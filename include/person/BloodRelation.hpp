@@ -34,6 +34,12 @@ class BloodRelation : virtual public Person {
      */
     std::shared_ptr<Wife> Mother() const;
 
+    /**
+     * getter for the siblings of the family member
+     * @return the siblings not containing the person him/herself
+     */
+    std::shared_ptr<Person::Vector<BloodRelation>> Siblings() const;
+
   private:
     /**
      * weak reference to father, prevent circular reference

@@ -18,18 +18,25 @@ class Wife : public Parent, public std::enable_shared_from_this<Wife> {
     /**
      * override from Parent
      */
-    virtual bool Divorce() override;
+    virtual std::shared_ptr<Parent> Couple() const override;
+
+  private:
+
+    Wife(const Info &info, std::shared_ptr<Male> husband);
 
     /**
      * override from Parent
      */
-    virtual std::shared_ptr<Parent> Couple() const override;
+    virtual bool DoDivorce() override;
 
-  private:
-    Wife(const Info &info, std::shared_ptr<Male> husband);
-
+    /**
+     * override from Parent
+     */
     virtual std::shared_ptr<Male> GetDaddy() override;
 
+    /**
+     * override from Parent
+     */
     virtual std::shared_ptr<Wife> GetMommy() override;
 
     /**

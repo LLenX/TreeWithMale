@@ -16,6 +16,11 @@ class Male
 
     friend std::shared_ptr<Person> Person::CreateAncestor(const Info &info);
 
+    /**
+     * enable wife to access the children when initialize
+     */
+    friend class Wife;
+
   public:
     /**
      * override from Parent
@@ -25,7 +30,7 @@ class Male
     /**
      * override from Parent
      */
-    virtual bool Divorce() override;
+    virtual bool DoDivorce() override;
 
     /**
      * override from Parent

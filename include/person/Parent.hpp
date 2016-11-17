@@ -29,7 +29,7 @@ class Parent : virtual public Person {
      * (if he/she has a couple, divorce may never fail)
      * @return true if the parent has a couple to divorce, false if not
      */
-    virtual bool Divorce() = 0;
+    bool Divorce();
 
     /**
      * determine whether the parent(PARENT is just a NAME) is married
@@ -55,6 +55,12 @@ class Parent : virtual public Person {
      * @return the pointer pointing to the mom of the child
      */
     virtual std::shared_ptr<Wife> GetMommy() = 0;
+
+    /**
+     * set the divorce state for the person him/herself
+     * @return false if the person(male) is not married or died
+     */
+    virtual bool DoDivorce() = 0;
 
     /**
      * children of the parent

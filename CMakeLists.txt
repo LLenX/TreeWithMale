@@ -1,18 +1,34 @@
-cmake_minimum_required(VERSION 3.6)
-
-set(CMAKE_CXX_COMPILER clang++)
-set(CMAKE_C_COMPILER  clang)
+cmake_minimum_required(VERSION 3.5)
 
 project(TreeWithMale)
 
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    set(CMAKE_CXX_COMPILER clang++)
+    set(CMAKE_C_COMPILER clang)
+endif ()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_BUILD_TYPE DEBUG)
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/person PERSON_SOURCE)
 
 include_directories(include/)
 
-add_executable(TestGetAncestor
-        ${PROJECT_SOURCE_DIR}/test/person/TestGetAncestor.cpp
-        ${PERSON_SOURCE})
+if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    add_executable(TestPerson
+            ${PROJECT_SOURCE_DIR}/test/person/PersonTest.cpp
+            ${PERSON_SOURCE})
+
+    set_target_properties(TestPerson PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin)
+
+    target_link_libraries(TestPerson gtest gtest_main pthread)
+
+    add_custom_target(test_person
+            COMMAND TestPerson
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin
+            COMMENT "running test for person")
+endif ()
 
 #add_executable(TreeWithMale ${SOURCE_FILES})

@@ -5,7 +5,9 @@ Male::Male(
     const Person::Info &info, std::shared_ptr<Male> dad,
     std::shared_ptr<Wife> mom)
     : Person(info, MALE), Parent(info, MALE),
-      BloodRelation(info, MALE, dad, mom) {}
+      BloodRelation(info, MALE, dad, mom), ex_wives_(
+        std::make_shared<Person::Vector<Wife>>()) {
+}
 
 bool Male::IsMarried() const {
     return wife_ != nullptr;
@@ -23,22 +25,21 @@ std::shared_ptr<Wife> Male::GetMommy() {
     return wife_;
 }
 
-bool Male::Divorce() {
-    bool can_divorce = IsMarried();
-    if (can_divorce) {
-        ex_wives_->push_back(wife_);
-        wife_.reset();
+bool Male::DoDivorce() {
+    if (not IsAlive() or not IsMarried()) {
+        return false;
     }
-    return can_divorce;
+    ex_wives_->push_back(wife_);
+    wife_.reset();
+    return true;
 }
 
-std::shared_ptr<const Person::Vector<Wife>>
-Male::ExWives() const {
+std::shared_ptr<const Person::Vector<Wife>> Male::ExWives() const {
     return ex_wives_;
 }
 
 std::shared_ptr<Wife> Male::Marry(const Person::Info &info) {
-    if (IsMarried()) {
+    if (not IsAlive() or IsMarried()) {
         return nullptr;
     }
     return wife_ = std::shared_ptr<Wife>(new Wife(info, shared_from_this()));

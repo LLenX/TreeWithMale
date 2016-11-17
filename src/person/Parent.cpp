@@ -16,12 +16,20 @@ shared_ptr<const Person::Vector<BloodRelation>> Parent::Children() const {
 
 shared_ptr<BloodRelation>
 Parent::GiveBirthTo(const Person::Info &info, Person::PersonGender gender) {
+    if (not IsAlive() or not IsMarried()) {
+        return nullptr;
+    }
     auto dad = GetDaddy();
     auto mom = GetMommy();
-    shared_ptr<BloodRelation> child = gender == MALE ? shared_ptr<BloodRelation>(
-        new Male(info, dad, mom)) : shared_ptr<BloodRelation>(
-        new FemaleMember(info, dad, mom));
+    shared_ptr<BloodRelation> child =
+        gender == MALE ? shared_ptr<BloodRelation>(
+            new Male(info, dad, mom)) : shared_ptr<BloodRelation>(
+            new FemaleMember(info, dad, mom));
     children_->push_back(child);
     return child;
+}
+
+bool Parent::Divorce() {
+    return Couple()->DoDivorce() and DoDivorce();
 }
 

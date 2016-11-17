@@ -4,16 +4,20 @@
 using std::shared_ptr;
 
 Wife::Wife(const Info &info, std::shared_ptr<Male> husband)
-    : Parent(info, FEMALE), Person(info, FEMALE), husband_(husband) {}
+    : Parent(info, FEMALE), Person(info, FEMALE), husband_(husband),
+      divorced_(false) {
+    children_ = husband->children_;
+}
 
 bool Wife::IsMarried() const {
     return not divorced_;
 }
 
-bool Wife::Divorce() {
-    bool can_divorce = not divorced_;
-    divorced_ = true;
-    return can_divorce;
+bool Wife::DoDivorce() {
+    if (not IsAlive() or not IsMarried()) {
+        return false;
+    }
+    return (divorced_ = true);
 }
 
 std::shared_ptr<Parent> Wife::Couple() const {
