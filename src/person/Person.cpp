@@ -19,3 +19,5 @@ Person::PersonGender Person::Gender() const {
     return gender_;
 }
 
+Person::~Person() {}
+

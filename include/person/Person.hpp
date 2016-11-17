@@ -36,6 +36,9 @@ class Person {
         MALE, FEMALE
     };
 
+    template<typename PersonType>
+    using Vector<PersonType> = std::vector<std::shared_ptr<PersonType>>;
+
     /**
      * constructor initialize basic information of a person
      * @param info the name of the person
@@ -61,6 +64,11 @@ class Person {
      * default move assignment
      */
     Person &operator=(Person &&) = default;
+
+    /**
+     * virtual dtor, do nothing
+     */
+    virtual ~Person();
 
     /**
      * whether the person is male
