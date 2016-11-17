@@ -9,10 +9,14 @@ class Male
     : public Parent,
       public BloodRelation,
       public std::enable_shared_from_this<Male> {
-  public:
-    Male(
-        const Info &info, std::shared_ptr<Male> dad, std::shared_ptr<Wife> mom);
+    /**
+     * only parent and GetAncestor can initialize a male
+     */
+    friend class Parent;
 
+    friend std::shared_ptr<Person> Person::CreateAncestor(const Info &info);
+
+  public:
     /**
      * override from Parent
      */
@@ -27,7 +31,7 @@ class Male
      * getter for ex-wives :)
      * @return the collection of the pointer point to ex-wives
      */
-    std::shared_ptr<const std::vector<std::shared_ptr<Wife>>> ExWives() const;
+    std::shared_ptr<const Person::Vector<Wife>> ExWives() const;
 
     /**
      * marry to the woman with corresponding info, if this man is married
@@ -35,9 +39,12 @@ class Male
      * @param info the information of the wife
      * @return the newly married wife
      */
-    std::shared_ptr<Wife> Marry(const Info& info);
+    std::shared_ptr<Wife> Marry(const Info &info);
 
   private:
+    Male(
+        const Info &info, std::shared_ptr<Male> dad, std::shared_ptr<Wife> mom);
+
     virtual std::shared_ptr<Male> GetDaddy() override;
 
     virtual std::shared_ptr<Wife> GetMommy() override;
@@ -50,7 +57,7 @@ class Male
     /**
      * ex_wives, you know this
      */
-    std::shared_ptr<std::vector<std::shared_ptr<Wife>>> ex_wives_;
+    std::shared_ptr<Person::Vector<Wife>> ex_wives_;
 };
 
 #endif //TREEWITHMALE_MALE_HPP

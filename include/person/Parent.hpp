@@ -22,7 +22,7 @@ class Parent : virtual public Person {
      * getter for the collection of children
      * @return the pointer to the const vector of the member
      */
-    std::shared_ptr<BloodRelation::ConstMembers> Children() const;
+    std::shared_ptr<const Person::Vector<BloodRelation>> Children() const;
 
     /**
      * divorce current couple if has any
@@ -59,7 +59,7 @@ class Parent : virtual public Person {
     /**
      * children of the parent
      */
-    std::shared_ptr<BloodRelation::Members> children_;
+    std::shared_ptr<Person::Vector<BloodRelation>> children_;
 };
 
 #endif //TREEWITHMALE_PERSONWITHCHILD_HPP

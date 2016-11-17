@@ -39,6 +39,8 @@ class Person {
     template<typename PersonType>
     using Vector<PersonType> = std::vector<std::shared_ptr<PersonType>>;
 
+    static std::shared_ptr<Person> CreateAncestor(const Info& info);
+
     /**
      * constructor initialize basic information of a person
      * @param info the name of the person
@@ -71,10 +73,16 @@ class Person {
     virtual ~Person();
 
     /**
-     * whether the person is male
-     * @return true if the person is male, false if not
+     * determine whether two people are the same person (compare by id)
+     * @return true if two people are equal, false if not
      */
-    virtual bool IsMale() const = 0;
+    bool operator==(const Person&) const;
+
+    /**
+     * determine whether two people are not the same person (compare by id)
+     * @return true if two people are not the same person, false if they are
+     */
+    bool operator!=(const Person&) const;
 
     /**
      * whether the person is alive

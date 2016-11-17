@@ -18,17 +18,21 @@ class BloodRelation : virtual public Person {
   public:
     using Self = BloodRelation;
 
-    /**
-     * too lazy to write a single class contains multiple family members
-     * (with iterators and blabla)
-     */
-    using Members = std::vector<std::shared_ptr<Self>>;
-
-    using ConstMembers = const std::vector<std::shared_ptr<Self>>;
-
     BloodRelation(
         const Info &info, PersonGender gender, std::shared_ptr<Male> dad,
         std::shared_ptr<Wife> mom);
+
+    /**
+     * getter for father
+     * @return the pointer pointing to father
+     */
+    std::shared_ptr<Male> Father() const;
+
+    /**
+     * getter for wife
+     * @return the pointer pointing to mother
+     */
+    std::shared_ptr<Wife> Mother() const;
 
   private:
     /**
@@ -45,7 +49,7 @@ class BloodRelation : virtual public Person {
      * weak reference to the children of the person's father/mother
      * which means siblings_ contains the person him/herself
      */
-    std::weak_ptr<ConstMembers> siblings_;
+    std::weak_ptr<const Person::Vector<BloodRelation>> siblings_;
 };
 
 #endif //TREEWITHMALE_BLOODRELATION_HPP

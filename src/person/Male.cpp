@@ -27,7 +27,7 @@ bool Male::Divorce() {
     return can_divorce;
 }
 
-std::shared_ptr<const std::vector<std::shared_ptr<Wife>>>
+std::shared_ptr<const Person::Vector<Wife>>
 Male::ExWives() const {
     return ex_wives_;
 }

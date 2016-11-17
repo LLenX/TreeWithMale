@@ -4,11 +4,10 @@
 #include "BloodRelation.hpp"
 
 class FemaleMember : public BloodRelation {
-  public:
+  friend class Parent;
+  private:
     FemaleMember(
         const Info &info, std::shared_ptr<Male> dad, std::shared_ptr<Wife> mom);
-
-  private:
 };
 
 #endif //TREEWITHMALE_FEMALEMEMBER_HPP
