@@ -26,7 +26,7 @@ class Wife : public Parent, public std::enable_shared_from_this<Wife> {
     virtual std::shared_ptr<Parent> Couple() const override;
 
   private:
-    Wife(const Info &info);
+    Wife(const Info &info, std::shared_ptr<Male> husband);
 
     virtual std::shared_ptr<Male> GetDaddy() override;
 

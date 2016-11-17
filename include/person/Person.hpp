@@ -37,7 +37,7 @@ class Person {
     };
 
     template<typename PersonType>
-    using Vector<PersonType> = std::vector<std::shared_ptr<PersonType>>;
+    using Vector = std::vector<std::shared_ptr<PersonType>>;
 
     static std::shared_ptr<Person> CreateAncestor(const Info& info);
 
@@ -105,6 +105,12 @@ class Person {
      * @return the reference to the id of a person
      */
     const std::string &Id() const;
+
+    /**
+     * getter for the name of person
+     * @return the reference to the name of a person
+     */
+    const std::string &Name() const;
 
   private:
     /**

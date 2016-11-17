@@ -27,7 +27,7 @@ bool Male::Divorce() {
     bool can_divorce = IsMarried();
     if (can_divorce) {
         ex_wives_->push_back(wife_);
-        wife_.reset(nullptr);
+        wife_.reset();
     }
     return can_divorce;
 }
@@ -41,5 +41,5 @@ std::shared_ptr<Wife> Male::Marry(const Person::Info &info) {
     if (IsMarried()) {
         return nullptr;
     }
-    return wife_ = std::make_shared<Wife>(info);
+    return wife_ = std::shared_ptr<Wife>(new Wife(info, shared_from_this()));
 }

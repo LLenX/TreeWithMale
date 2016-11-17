@@ -1,9 +1,10 @@
 #include "person/Wife.hpp"
+#include "person/Male.hpp"
 
 using std::shared_ptr;
 
-Wife::Wife(const Person::Info &info)
-    : Parent(info, FEMALE), Person(info, FEMALE) {}
+Wife::Wife(const Info &info, std::shared_ptr<Male> husband)
+    : Parent(info, FEMALE), Person(info, FEMALE), husband_(husband) {}
 
 bool Wife::IsMarried() const {
     return not divorced_;

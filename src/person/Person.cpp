@@ -34,3 +34,7 @@ std::shared_ptr<Person> Person::CreateAncestor(const Person::Info &info) {
     return std::shared_ptr<Person>(new Male(info, nullptr, nullptr));
 }
 
+const std::string &Person::Name() const {
+    return info_.name;
+}
+
