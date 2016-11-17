@@ -18,8 +18,8 @@ shared_ptr<BloodRelation>
 Parent::GiveBirthTo(const Person::Info &info, Person::PersonGender gender) {
     auto dad = GetDaddy();
     auto mom = GetMommy();
-    shared_ptr<BloodRelation> child = gender == MALE ? shared_ptr<Male>(
-        new Male(info, dad, mom)) : shared_ptr<FemaleMember>(
+    shared_ptr<BloodRelation> child = gender == MALE ? shared_ptr<BloodRelation>(
+        new Male(info, dad, mom)) : shared_ptr<BloodRelation>(
         new FemaleMember(info, dad, mom));
     children_->push_back(child);
     return child;

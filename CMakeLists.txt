@@ -7,7 +7,12 @@ project(TreeWithMale)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-file(GLOB_RECURSE SOURCE_FILES *.cpp)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/person PERSON_SOURCE)
+
 include_directories(include/)
 
-add_executable(TreeWithMale ${SOURCE_FILES})
+add_executable(TestGetAncestor
+        ${PROJECT_SOURCE_DIR}/test/person/TestGetAncestor.cpp
+        ${PERSON_SOURCE})
+
+#add_executable(TreeWithMale ${SOURCE_FILES})

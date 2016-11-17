@@ -3,11 +3,12 @@
 
 #include "Parent.hpp"
 
-class Wife : public Parent, std::enable_shared_from_this<Wife> {
+class Wife : public Parent, public std::enable_shared_from_this<Wife> {
     /**
      * only Male can construct the wife (by marry)
      */
     friend class Male;
+
   public:
     /**
      * override from parent
@@ -19,11 +20,16 @@ class Wife : public Parent, std::enable_shared_from_this<Wife> {
      */
     virtual bool Divorce() override;
 
+    /**
+     * override from Parent
+     */
+    virtual std::shared_ptr<Parent> Couple() const override;
+
   private:
-    Wife(const Info &info)
-        : Parent(info, MALE), divorced_(false) {}
+    Wife(const Info &info);
 
     virtual std::shared_ptr<Male> GetDaddy() override;
+
     virtual std::shared_ptr<Wife> GetMommy() override;
 
     /**

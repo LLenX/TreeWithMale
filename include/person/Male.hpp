@@ -28,6 +28,11 @@ class Male
     virtual bool Divorce() override;
 
     /**
+     * override from Parent
+     */
+    virtual std::shared_ptr<Parent> Couple() const override;
+
+    /**
      * getter for ex-wives :)
      * @return the collection of the pointer point to ex-wives
      */
@@ -40,6 +45,7 @@ class Male
      * @return the newly married wife
      */
     std::shared_ptr<Wife> Marry(const Info &info);
+
 
   private:
     Male(

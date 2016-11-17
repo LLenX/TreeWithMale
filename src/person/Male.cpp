@@ -1,4 +1,5 @@
 #include "person/Male.hpp"
+#include "person/Wife.hpp"
 
 Male::Male(
     const Person::Info &info, std::shared_ptr<Male> dad,
@@ -8,6 +9,10 @@ Male::Male(
 
 bool Male::IsMarried() const {
     return wife_ != nullptr;
+}
+
+std::shared_ptr<Parent> Male::Couple() const {
+    return wife_;
 }
 
 std::shared_ptr<Male> Male::GetDaddy() {
