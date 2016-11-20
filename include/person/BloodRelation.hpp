@@ -16,8 +16,6 @@ class Male;
 
 class BloodRelation : virtual public Person {
   public:
-    using Self = BloodRelation;
-
     BloodRelation(
         const Info &info, PersonGender gender, std::shared_ptr<Male> dad,
         std::shared_ptr<Wife> mom);

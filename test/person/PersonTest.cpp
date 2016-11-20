@@ -45,6 +45,11 @@ TEST_F(MaleTest, TestMarry) {
     EXPECT_TRUE(father->IsMarried());
     EXPECT_TRUE(kate->IsMarried());
 
+    std::shared_ptr<Wife> anonymous = father->Marry(
+        Person::Info("Another Wife", "Anonymous"));
+
+    EXPECT_EQ(anonymous, nullptr);
+
     father->Divorce();
 
     EXPECT_FALSE(father->IsMarried());
