@@ -16,7 +16,8 @@ shared_ptr<Person> FamilyTree::CreateAncestor(const Person::Info &info) {
         SetError(Error::PERSON_CONFILCT);
         return nullptr;
     }
-    person_record_[info.id] = ancestor_ = Person::CreateAncestor(info);
+    selected_person_ = person_record_[info.id] = ancestor_ = Person::CreateAncestor(
+        info);
     return ancestor_;
 }
 
@@ -24,6 +25,7 @@ std::shared_ptr<Person> FamilyTree::SelectPerson(const std::string &id) {
     auto search_result_iter = person_record_.find(id);
     if (search_result_iter == end(person_record_)) {
         SetError(Error::RESULT_NOT_FOUND);
+        return nullptr;
     }
     return selected_person_ = search_result_iter->second;
 }
@@ -36,48 +38,16 @@ bool FamilyTree::CheckPersonSelected() {
     return true;
 }
 
-template<typename GuessType, typename CurrentType>
-std::shared_ptr<GuessType>
-FamilyTree::CheckAndCast(std::shared_ptr<CurrentType> person) {
-    auto result_ptr = dynamic_pointer_cast<GuessType>(person);
-    if (not result_ptr) {
-        SetError(Error::INVALID_TYPE);
-    }
-    return result_ptr;
-}
-
-template<typename Result, typename Person>
-std::shared_ptr<const Result> FamilyTree::GetAndCheckExist(
-    std::shared_ptr<Person> person,
-    shared_ptr<Result> (Person::*getter)() const) {
-    std::shared_ptr<Result> result_ptr = ((*person).*getter)();
-    if (not result_ptr) {
-        SetError(Error::RESULT_NOT_FOUND);
-    }
-    return result_ptr;
-}
-
-template<typename Result, typename Person>
-std::shared_ptr<Result>
-FamilyTree::GetFamilyMember(shared_ptr<Result> (*getter)() const) {
-    if (not CheckPersonSelected()) {
-        return nullptr;
-    }
-
-    auto casted_person = CheckAndCast<Person>(selected_person_);
-    if (not casted_person) {
-        return nullptr;
-    }
-
-    return GetAndCheckExist(casted_person, getter);
-}
-
-std::shared_ptr<Wife> FamilyTree::GetMother() {
+std::shared_ptr<const Wife> FamilyTree::GetMother() {
     return GetFamilyMember(&BloodRelation::Mother);
 }
 
-std::shared_ptr<Male> FamilyTree::GetFather() {
+std::shared_ptr<const Male> FamilyTree::GetFather() {
     return GetFamilyMember(&BloodRelation::Father);
+}
+
+std::shared_ptr<const Parent> FamilyTree::GetCouple() {
+    return GetFamilyMember(&Parent::Couple);
 }
 
 std::shared_ptr<const Person::Vector<BloodRelation>> FamilyTree::GetSiblings() {
@@ -137,4 +107,15 @@ FamilyTree::GiveBirthTo(const Person::Info &info, Person::PersonGender gender) {
         person_record_[info.id] = baby;
     }
     return baby;
+}
+
+bool FamilyTree::Die() {
+    if (not CheckPersonSelected()) {
+        return false;
+    }
+    bool success = selected_person_->Die();
+    if (not success) {
+        SetError(Error::WRONG_LOGIC);
+    }
+    return success;
 }

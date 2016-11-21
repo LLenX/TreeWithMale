@@ -8,8 +8,10 @@ bool Person::IsAlive() const {
     return is_alive_;
 }
 
-void Person::Die() {
+bool Person::Die() {
+    bool success = IsAlive();
     is_alive_ = false;
+    return success;
 }
 
 const std::string &Person::Id() const {

@@ -72,7 +72,7 @@ class FamilyTree {
      * @return pointer pointing to the mother of the selected person, nullptr
      *         if one of the error above occurs
      */
-    std::shared_ptr<Wife> GetMother();
+    std::shared_ptr<const Wife> GetMother();
 
     /**
      * get father of the selected person, doesn't change the selected person
@@ -82,7 +82,16 @@ class FamilyTree {
      * @return pointer pointing to the father of the selected person, nullptr
      *         if one of the error above occurs
      */
-    std::shared_ptr<Male> GetFather();
+    std::shared_ptr<const Male> GetFather();
+
+    /**
+     * get the couple of the selected person, doesn't change the selected person
+     * if no person is selected, EMPTY_SELECTION is set
+     * if the selected person is not Parent, INVALID_TYPE is set
+     * @return pointer pointing to the couple of the selected person, nullptr
+     *         if one of the error above occurs
+     */
+    std::shared_ptr<const Parent> GetCouple();
 
     /**
      * get siblings of the selected person, doesn't change the selected person
@@ -91,7 +100,7 @@ class FamilyTree {
      * @return pointer pointing to the Vector of siblings of the selected person
      *         nullptr if one of the error above occurs
      */
-    std::shared_ptr<Person::Vector<BloodRelation>> GetSiblings();
+    std::shared_ptr<const Person::Vector<BloodRelation>> GetSiblings();
 
     /**
      * get children of the selected person, doesn't change the selected person
@@ -100,7 +109,7 @@ class FamilyTree {
      * @return pointer pointing to the mother of the selected person, nullptr
      *         if one of the error above occurs
      */
-    std::shared_ptr<Person::Vector<BloodRelation>> GetChildren();
+    std::shared_ptr<const Person::Vector<BloodRelation>> GetChildren();
 
     /**
      * the selected person give birth to a baby and return the baby if success
@@ -135,6 +144,14 @@ class FamilyTree {
      */
     bool Divorce();
 
+    /**
+     * kill the selected person
+     * if no person is selectied, EMPTY_SELECTION is set
+     * if selected person is dead already, WRONG_LOGIC is set
+     * @return true if the person's killed successfully, false if fail
+     */
+    bool Die();
+
   private:
     /**
      * set error to the corresponding error
@@ -155,8 +172,19 @@ class FamilyTree {
      * @return the result pointer, nullptr if error happened
      */
     template<typename Result, typename Person>
-    std::shared_ptr<Result>
-    GetFamilyMember(std::shared_ptr<Result> (Person::*getter)() const);
+    std::shared_ptr<const Result>
+    GetFamilyMember(std::shared_ptr<Result> (Person::*getter)() const) {
+        if (not CheckPersonSelected()) {
+            return nullptr;
+        }
+
+        auto casted_person = CheckAndCast<Person>(selected_person_);
+        if (not casted_person) {
+            return nullptr;
+        }
+
+        return GetAndCheckExist(casted_person, getter);
+    }
 
     /**
      * check whether the pointer of current type can be dynamically convert to
@@ -166,7 +194,13 @@ class FamilyTree {
      */
     template<typename GuessType, typename CurrentType>
     std::shared_ptr<GuessType> CheckAndCast(
-        std::shared_ptr<CurrentType> person);
+        std::shared_ptr<CurrentType> person) {
+        auto result_ptr = std::dynamic_pointer_cast<GuessType>(person);
+        if (not result_ptr) {
+            SetError(Error::INVALID_TYPE);
+        }
+        return result_ptr;
+    }
 
     /**
      * helper function to invoke the getter of a person and check whether the
@@ -176,9 +210,15 @@ class FamilyTree {
      * @return the result of getter
      */
     template<typename Result, typename Person>
-    std::shared_ptr<Result> GetAndCheckExist(
+    std::shared_ptr<const Result> GetAndCheckExist(
         std::shared_ptr<Person> person,
-        std::shared_ptr<Result> (Person::*getter)() const);
+        std::shared_ptr<Result> (Person::*getter)() const) {
+        std::shared_ptr<Result> result_ptr = ((*person).*getter)();
+        if (not result_ptr) {
+            SetError(Error::RESULT_NOT_FOUND);
+        }
+        return result_ptr;
+    }
 
     /**
      * helper function to check if the id exists in the record, if so, return

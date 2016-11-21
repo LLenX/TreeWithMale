@@ -27,6 +27,20 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
             COMMAND TestPerson
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin
             COMMENT "running test for person")
+
+    add_executable(TestTree
+            ${PROJECT_SOURCE_DIR}/test/TreeTest.cpp
+            ${PERSON_SOURCE}
+            ${PROJECT_SOURCE_DIR}/src/FamilyTree.cpp)
+    set_target_properties(TestTree PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin)
+    target_link_libraries(TestTree gtest gtest_main pthread)
+
+    add_custom_target(test_tree
+            COMMAND TestTree
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin
+            COMMENT "running test for tree")
+
 endif ()
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ SOURCE_FILES)
