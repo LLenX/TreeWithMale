@@ -105,6 +105,7 @@ TEST_F(WifeTest, TestDivorce) {
     EXPECT_FALSE(chen_yuxiang->IsMarried());
     EXPECT_FALSE(chen_xu->IsMarried());
     EXPECT_EQ(*chen_xu->ExWives()->front(), *chen_yuxiang);
+    EXPECT_FALSE(chen_xu->Divorce());
 }
 
 TEST_F(WifeTest, TestBirth) {

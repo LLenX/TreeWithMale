@@ -21,13 +21,17 @@ shared_ptr<Person> FamilyTree::CreateAncestor(const Person::Info &info) {
     return ancestor_;
 }
 
-std::shared_ptr<Person> FamilyTree::SelectPerson(const std::string &id) {
+std::shared_ptr<const Person> FamilyTree::SelectPerson(const std::string &id) {
     auto search_result_iter = person_record_.find(id);
     if (search_result_iter == end(person_record_)) {
         SetError(Error::RESULT_NOT_FOUND);
         return nullptr;
     }
     return selected_person_ = search_result_iter->second;
+}
+
+std::shared_ptr<const Person> FamilyTree::SelectPerson() {
+    return selected_person_;
 }
 
 bool FamilyTree::CheckPersonSelected() {
@@ -58,11 +62,18 @@ std::shared_ptr<const Person::Vector<BloodRelation>> FamilyTree::GetChildren() {
     return GetFamilyMember(&Parent::Children);
 }
 
+std::shared_ptr<const Person::Vector<Wife>> FamilyTree::GetExWives() {
+    return GetFamilyMember(&Male::ExWives);
+}
+
 bool FamilyTree::Divorce() {
     if (not CheckPersonSelected()) {
         return false;
     }
     auto parent = CheckAndCast<Parent>(selected_person_);
+    if (not parent) {
+        return false;
+    }
     return parent->Divorce();
 }
 

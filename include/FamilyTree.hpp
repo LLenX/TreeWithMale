@@ -62,7 +62,13 @@ class FamilyTree {
      * @param id the unique id used to index the person
      * @return the pointer to the corresponding person, nullptr if not found
      */
-    std::shared_ptr<Person> SelectPerson(const std::string &id);
+    std::shared_ptr<const Person> SelectPerson(const std::string &id);
+
+    /**
+     * getter for the person which is currently selected
+     * @return the selected person of the family tree
+     */
+    std::shared_ptr<const Person> SelectPerson();
 
     /**
      * get mother of the selected person, doesn't change the selected person
@@ -106,10 +112,19 @@ class FamilyTree {
      * get children of the selected person, doesn't change the selected person
      * if no person is selected, EMPTY_SELECTION is set
      * if the selected person is not parent, INVALID_TYPE is set
-     * @return pointer pointing to the mother of the selected person, nullptr
+     * @return pointer pointing to the children of the selected person, nullptr
      *         if one of the error above occurs
      */
     std::shared_ptr<const Person::Vector<BloodRelation>> GetChildren();
+
+    /**
+     * get ex-wives of the selected person, doesn't change the selected person
+     * if no person is selected, EMPTY_SELECTION is set
+     * if the selected person is not male, INVALID_TYPE is set
+     * @return pointer pointing to the ex-wives of the selected person, nullptr
+     *         if one of the error above occurs
+     */
+    std::shared_ptr<const Person::Vector <Wife>> GetExWives();
 
     /**
      * the selected person give birth to a baby and return the baby if success

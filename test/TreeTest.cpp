@@ -47,6 +47,33 @@ TEST_F(TreeTest, TestMarry) {
     some_person = family_tree.GetCouple();
     EXPECT_EQ(some_person->Id(), "future wife id");
 
-    some_person = family_tree.SelectPerson("future wife id");
-    EXPECT_EQ(some_person->Id(), "future wife id");
+}
+
+class TreeTest2: public testing::Test {
+  protected:
+    void SetUp() {
+        family_tree.CreateAncestor(Person::Info("Ancestor", "XMQ"));
+        family_tree.Marry(Person::Info("FutureWife", "Unknown"));
+    }
+    std::shared_ptr<const Person> some_person;
+    FamilyTree family_tree;
+};
+
+TEST_F(TreeTest2, TestMaleDivorce) {
+    some_person = family_tree.SelectPerson("Ancestor");
+    ASSERT_EQ(family_tree.GetCouple()->Id(), "FutureWife");
+    family_tree.Divorce();
+    EXPECT_FALSE(family_tree.GetCouple());
+    EXPECT_EQ(family_tree.GetExWives()->size(), 1);
+    EXPECT_EQ(family_tree.GetExWives()->front()->Id(), "FutureWife");
+    ASSERT_TRUE(family_tree.Marry(Person::Info("Another Wife", "Whatever")));
+}
+
+TEST_F(TreeTest2, TestWifeDivorce) {
+    some_person = family_tree.SelectPerson("FutureWife");
+    EXPECT_EQ(some_person->Id(), "FutureWife");
+
+    family_tree.Divorce();
+    EXPECT_FALSE(family_tree.GetCouple());
+    EXPECT_EQ(family_tree.GetError(), FamilyTree::Error::RESULT_NOT_FOUND);
 }
