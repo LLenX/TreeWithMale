@@ -93,7 +93,7 @@ class Person {
     /**
      * kill the person
      */
-    void Die();
+    bool Die();
 
     /**
      * gender of a person, should be compare to Person::MALE or Person::FEMALE

@@ -17,10 +17,14 @@ bool Wife::DoDivorce() {
     if (not IsAlive() or not IsMarried()) {
         return false;
     }
+    husband_ = shared_ptr<Male>();
     return (divorced_ = true);
 }
 
 std::shared_ptr<Parent> Wife::Couple() const {
+    if (husband_.expired()) {
+        return nullptr;
+    }
     return shared_ptr<Parent>(husband_);
 }
 

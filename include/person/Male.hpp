@@ -30,11 +30,6 @@ class Male
     /**
      * override from Parent
      */
-    virtual bool DoDivorce() override;
-
-    /**
-     * override from Parent
-     */
     virtual std::shared_ptr<Parent> Couple() const override;
 
     /**
@@ -51,10 +46,14 @@ class Male
      */
     std::shared_ptr<Wife> Marry(const Info &info);
 
-
   private:
     Male(
         const Info &info, std::shared_ptr<Male> dad, std::shared_ptr<Wife> mom);
+
+    /**
+     * override from Parent
+     */
+    virtual bool DoDivorce() override;
 
     virtual std::shared_ptr<Male> GetDaddy() override;
 

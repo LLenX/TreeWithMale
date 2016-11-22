@@ -30,6 +30,10 @@ Parent::GiveBirthTo(const Person::Info &info, Person::PersonGender gender) {
 }
 
 bool Parent::Divorce() {
-    return Couple()->DoDivorce() and DoDivorce();
+    auto couple = Couple();
+    if (not Couple()) {
+        return false;
+    }
+    return couple->DoDivorce() and DoDivorce();
 }
 
