@@ -1,24 +1,22 @@
-#ifndef UI_MENU_HPP
-#define UI_MENU_HPP
+#ifndef TREEWITHMALE_UI_MENU_HPP_
+#define TREEWITHMALE_UI_MENU_HPP_
 
-#include "MenuItem.hpp"
 #include <map>
-#include <unordered_map>
+
+class MenuItem;
 
 class Menu {
  private:
  public:
-  Menu();
+  Menu(const std::string &i_description);
   void show() const;
-  bool register(const std::string &newOp,
-                const std::shared_ptr<MenuItem> &menuItemPtr);
+  bool addOp(const std::shared_ptr<MenuItem> &menuItemPtr);
   bool hasOp(const std::string &op) const;
   void execOp(const std::string &op) const;
  private:
-  std::unordered_map<const std::string, const std::shared_ptr<MenuItem>> items;
-  std::map<const std::string, const std::string> descriptions;
+  std::map<std::string, std::shared_ptr<MenuItem>> items;
   std::string description = "Menu";
   std::size_t maxOpWidth = 0;
 };
 
-#endif  // UI_MENU_HPP
+#endif  // TREEWITHMALE_UI_MENU_HPP_

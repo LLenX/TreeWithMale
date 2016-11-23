@@ -1,29 +1,46 @@
-#ifndef UI_MENUITEM_HPP
-#define UI_MENUITEM_HPP
+#ifndef TREEWITHMALE_UI_MENUITEM_HPP_
+#define TREEWITHMALE_UI_MENUITEM_HPP_
 
 #include <functional>
 #include <string>
+#include <memory>
 
 class Menu;
-typedef std::function<void (*)()> CmdFunc;
+class UIController;
+
+enum MenuItemType {
+  SubMenu,
+  Command
+};
+
 class MenuItem {
  private:
+  typedef std::function<void()> CmdFunc;
   union ItemPtr {
-   std::shared_ptr<Menu> subMenuPtr;
-   std::shared_ptr<CmdFunc> command;
+   public:
+    friend class MenuItem;
+    ItemPtr();
+    ~ItemPtr();
+    std::shared_ptr<Menu> subMenuPtr;
+    CmdFunc commandFunc;
   };
  public:
-  enum ItemType {
-    SubMenu,
-    Command
-  };
-  MenuItem(ItemType i_itemType, const std::string &i_key, std::shared_ptr<Menu> i_subMenuPtr);
-  MenuItem(ItemType i_itemType, const std::string &i_key, std::shared_ptr<CmdFunc> i_cmdFunc);
+  friend class Menu;
+  MenuItem(MenuItemType i_type,
+           const std::string &i_key, const std::string &i_description,
+           std::shared_ptr<Menu> i_subMenuPtr,
+           bool i_isShortcut = false);
+  MenuItem(MenuItemType i_type,
+           const std::string &i_key, const std::string &i_description,
+           CmdFunc i_cmdFunc,
+           bool i_isShortcut = false);
   void exec() const;
  private:
   ItemPtr item;
-  const ItemType itemType;
+  const MenuItemType type;
   const std::string key;
+  const std::string description;
+  const bool isShortcut;
 };
 
-#endif  // UI_MENUITEM_HPP
+#endif  // TREEWITHMALE_UI_MENUITEM_HPP_

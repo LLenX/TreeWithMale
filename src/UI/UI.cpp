@@ -2,17 +2,18 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include "UI/UI.hpp"
-UI::UI() {
+#include "./UI/UI.hpp"
+#include "./UI/Terminal.hpp"
+
+UI::UI()
+: topMenuPtr(new Menu("Main")) {
   curMenuPtr = topMenuPtr;
 }
 
-UI::~UI() {
+UI::~UI() {}
 
-}
-
-std::shared_ptr<UI> UI::getInstancePtr() const {
-  static std::shared_ptr<UI> instancePtr = UI();
+std::shared_ptr<UI> UI::getInstancePtr() {
+  static std::shared_ptr<UI> instancePtr(new UI());
   return instancePtr;
 }
 
@@ -27,28 +28,34 @@ static void trim(std::string &str) {
   }
 }
 
-std::string &&UI::inputOp(std::function<bool (*)(const std::string &)> isValid) {
-  std::string oneLine;
-  std::stringstream ss;
+std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
+                        const std::string &message) {
+  std::string oneLine, failedPrompt,
+              promptMsg = message.length() ? message : defaultPrompt;
   while (true) {
-    std::cout << prompt << std::flush;
+#ifdef WIN32
+    std::cout << promptMsg << std::flush;
     std::getline(std::cin, oneLine);
+#else  // defined WIN32
+    oneLine = prompt(promptMsg);
+#endif  // not defined WIN32
     trim(oneLine);
-    if (0 == oneLine.length()) {
-      continue;
-    }
-    if (isValid(oneLine)) {
-      break;
-    }
-    std::cout << "\nUnrecognized Operation. Please try again.\n" << std::endl;
+    if (0 == oneLine.length()) continue;
+    std::cout << std::endl;
+    failedPrompt = isValid(oneLine);
+    if (0 == failedPrompt.length()) break;
+    std::cout << failedPrompt << std::endl << std::endl;
   }
   return std::move(oneLine);
 }
 
-void UI::loop() {
-  curMenuPtr->show();
-  std::string op = inputOp([&](const std::string &op) -> bool {
-    return curMenuPtr->hasOp(key);
+void UI::oneLoop() {
+  std::string operation = input([&](const std::string &op) -> std::string {
+    if (curMenuPtr->hasOp(op)) {
+      return "";
+    } else {
+      return "Omoshiroi Operation. Please try a valid one next time.";
+    }
   });
-  curMenuPtr->execOp(op);
+  curMenuPtr->execOp(operation);
 }

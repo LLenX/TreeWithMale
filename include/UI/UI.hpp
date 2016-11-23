@@ -1,23 +1,27 @@
-#ifndef UI_HPP
-#define UI_HPP
+#ifndef TREEWITHMALE_UI_HPP_
+#define TREEWITHMALE_UI_HPP_
 
 #include <string>
-#include <memory>
 #include <functional>
 #include <memory>
-#include "Menu.hpp"
+#include <stack>
+#include "./UI/Menu.hpp"
 
+class UIController;
 class UI {
  public:
-  static std::shared_ptr<UI> getInstance() const;
-  void loop();
- private:
-  std::shared_ptr<Menu> topMenuPtr = new Menu();
-  std::shared_ptr<Menu> curMenuPtr = nullptr;
-  UI();
+  friend class UIController;
+  static std::shared_ptr<UI> getInstancePtr();
+  void oneLoop();
   ~UI();
-  std::string &&UI::inputOp(std::function<bool (*)(const std::string &)> isValid);
-  static const char *prompt = ">>> ";
+ private:
+  std::shared_ptr<Menu> topMenuPtr;
+  std::shared_ptr<Menu> curMenuPtr = nullptr;
+  std::stack<std::shared_ptr<Menu>> menuStack;
+  UI();
+  std::string &&input(std::function<std::string(const std::string &)> isValid,
+                      const std::string &message = "");
+  static constexpr const char *defaultPrompt = ">>> ";
 };
-#endif  // UI_HPP
 
+#endif  // TREEWITHMALE_UI_HPP_
