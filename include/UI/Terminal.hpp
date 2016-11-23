@@ -3,6 +3,7 @@
 #define TREEWITHMALE_UI_TERMINAL_HPP_
 #include <termios.h>
 #include <unistd.h>
+#include <memory>
 #include <iostream>
 class Terminal {
  public:
@@ -15,7 +16,7 @@ class Terminal {
   void setInputFormat();
   void reset();
   ~Terminal();
-  static Terminal instance;
+  static std::shared_ptr<Terminal> getInstancePtr();
  private:
   termios oldSettings;
 };
