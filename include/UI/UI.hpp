@@ -21,6 +21,7 @@ class UI {
   UI();
   std::string input(std::function<std::string(const std::string &)> isValid,
                       const std::string &message = "");
+  bool confirm(const std::string &message);
   static constexpr const char *defaultPrompt = ">>>";
 };
 

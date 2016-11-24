@@ -73,3 +73,18 @@ void UI::oneLoop() {
   }
   
 }
+
+bool UI::confirm(const std::string &message) {
+  std::cout << message << std::endl;
+  std::string confirm = input([&](const std::string &inputStr) -> std::string {
+    return "";
+  }, "[y/n]");
+  if (confirm == "y"
+      or confirm == "Y"
+      or confirm == "yes"
+      or confirm == "Yes"
+      or confirm == "YES") {
+    return true;
+  }
+  return false;
+}

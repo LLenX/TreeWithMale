@@ -17,11 +17,10 @@ class UIController {
   UIController();
   std::shared_ptr<UI> UIPtr;
   std::vector<std::shared_ptr<FamilyTree>> trees;
-  std::vector<std::size_t> treesPersonNum;
+  std::vector<std::size_t> treesPeopleTotal;
   std::size_t selectedTreeIndex = 0;
   std::size_t treesNum = 0;
   bool started = false;
-  Person *selectedPersonPtr;
 
   /* controllers */
   void init();
@@ -37,14 +36,15 @@ class UIController {
   void displayTreesInfo();
 
   std::shared_ptr<Menu> getOneTreeMenuPtr(const std::string &description);
-  void selectPersonIndex();
+  std::shared_ptr<const Person> selectPersonIndex();
   void selectPerson();
   void displayTree();
   void deleteTree();
   void searchTreeForPeopleByName();
   const std::string &getAncestorNameByTreeIndex(std::size_t index);
 
-  std::shared_ptr<Menu> getOnePersonMenuPtr(const std::string &description);
+  std::shared_ptr<Menu> getOnePersonMenuPtr(const std::string &name, std::shared_ptr<const Person> personPtr);
+  inline bool personIsMale(std::shared_ptr<const Person> personPtr);
   void die();
   void marry();
   void divorce();
@@ -55,6 +55,7 @@ class UIController {
   void checkoutSilbings();
   void checkoutChildren();
   void checkoutExWives();
+
 };
 
 #endif  // TREEWITHMALE_UI_CONTROLLER_HPP_

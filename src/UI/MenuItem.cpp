@@ -7,31 +7,27 @@ using MenuItemType::SubMenu;
 
 MenuItem::MenuItem(MenuItemType type,
                    const std::string &key, const std::string &description,
-                   std::shared_ptr<Menu> i_subMenuPtr,
+                   std::shared_ptr<Menu> subMenuPtr,
                    bool isShortcut, bool isCtrl)
-: type(type),
-  key(key), description(description),
-  isShortcut(isShortcut), isCtrl(isCtrl) {
-  item.subMenuPtr = i_subMenuPtr;
-}
+: type(type), key(key), description(description),
+  subMenuPtr(subMenuPtr),
+  isShortcut(isShortcut), isCtrl(isCtrl) {}
 
 MenuItem::MenuItem(MenuItemType type,
                    const std::string &key, const std::string &description,
-                   MenuItem::CmdFunc i_cmdFunc,
+                   MenuItem::CmdFunc commandFunc,
                    bool isShortcut, bool isCtrl)
-: type(type),
-  key(key), description(description),
-  isShortcut(isShortcut), isCtrl(isCtrl) {
-  item.commandFunc = i_cmdFunc;
-}
+: type(type), key(key), description(description),
+  commandFunc(commandFunc),
+  isShortcut(isShortcut), isCtrl(isCtrl) {}
 
 void MenuItem::exec() const {
   switch (type) {
     case SubMenu:
-      item.subMenuPtr->show();
+      subMenuPtr->show();
       break;
     case Command:
-      item.commandFunc();
+      commandFunc();
       break;
     default:
       break;
@@ -41,6 +37,3 @@ void MenuItem::exec() const {
 bool MenuItem::isSubMenu() const {
   return type == SubMenu;
 }
-
-MenuItem::ItemPtr::ItemPtr() {}
-MenuItem::ItemPtr::~ItemPtr() {}

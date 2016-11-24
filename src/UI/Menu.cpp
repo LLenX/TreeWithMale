@@ -16,23 +16,25 @@ void coutFence(const std::string &description, bool top = true) {
 void Menu::show() const {
   coutFence(description);
   std::cout << std::endl;
-  if (items.empty()) {
-    std::cout << "No items available" << std::endl;
-  } else {
-    for (auto &oneItem : items) {
-      if (oneItem.second->isShortcut or oneItem.second->isCtrl) continue;
-      std::cout << std::setw(static_cast<int>(maxOpWidth))
-                << oneItem.first << " - " << oneItem.second->description
-                << std::endl;
-    }
-    std::cout << std::endl;
-    for (auto &oneItem : items) {
-      if (oneItem.second->isShortcut or (not oneItem.second->isCtrl)) continue;
-      std::cout << std::setw(static_cast<int>(maxOpWidth))
-                << oneItem.first << " - " << oneItem.second->description
-                << std::endl;
-    }
+  std::size_t count = 0;
+  for (auto &oneItem : items) {
+    if (oneItem.second->isShortcut or oneItem.second->isCtrl) continue;
+    ++count;
+    std::cout << std::setw(static_cast<int>(maxOpWidth))
+              << oneItem.first << " - " << oneItem.second->description
+              << std::endl;
   }
+  if (0 == count) {
+    std::cout << "No items available" << std::endl;
+  }
+  std::cout << std::endl;
+  for (auto &oneItem : items) {
+    if (oneItem.second->isShortcut or (not oneItem.second->isCtrl)) continue;
+    std::cout << std::setw(static_cast<int>(maxOpWidth))
+              << oneItem.first << " - " << oneItem.second->description
+              << std::endl;
+  }
+
   std::cout << std::endl;
   coutFence(description, false);
 }
@@ -59,5 +61,5 @@ bool Menu::opIsSubMenu(const std::string &op) const {
 
 std::shared_ptr<Menu> Menu::getSubMenuPtrOf(const std::string &op) const {
   if (not hasOp(op) || not opIsSubMenu(op)) return std::make_shared<Menu>(nullptr);
-  return items.at(op)->item.subMenuPtr;
+  return items.at(op)->subMenuPtr;
 }

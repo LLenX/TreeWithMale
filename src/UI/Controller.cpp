@@ -63,7 +63,7 @@ void UIController::init() {
 
 void UIController::quit() {
   started = false;
-  std::cout << "Goodbye!" << std::endl;
+  std::cout << "Goodbye!\n" << std::endl;
 }
 
 void UIController::back() {
@@ -85,7 +85,10 @@ void UIController::displayTreesInfo() {
   }
   for (std::size_t index = 0, size = trees.size(); index < size; ++index) {
     if (trees[index].get() == nullptr) continue;
-    std::cout << "[" << index + 1 << "] " << getAncestorNameByTreeIndex(index) << "'s family tree" << std::endl;
+    std::cout << "[" << index + 1 << "] "
+              << getAncestorNameByTreeIndex(index)
+              << "'s family tree"
+              << std::endl;
   }
 }
 
@@ -106,6 +109,7 @@ void UIController::createNewTree() {
   std::shared_ptr<FamilyTree> newTree(new FamilyTree());
   selectedTreeIndex = trees.size();
   trees.push_back(newTree);
+  treesPeopleTotal.push_back(1);
   newTree->CreateAncestor(Person::Info("1", name));
   ++treesNum;
   std::cout << name << "'s family tree was created successfully." << std::endl;
@@ -143,7 +147,10 @@ std::size_t UIController::selectTreeIndex() {
 
 void UIController::deleteTree() {
   --treesNum;
-  std::cout << "[" << selectedTreeIndex + 1 << "] " << getAncestorNameByTreeIndex(selectedTreeIndex) << "'s family tree was deleted successfully." << std::endl;
+  std::cout << "[" << selectedTreeIndex + 1 << "] "
+            << getAncestorNameByTreeIndex(selectedTreeIndex)
+            << "'s family tree was deleted successfully."
+            << std::endl;
   trees[selectedTreeIndex].reset();
   selectedTreeIndex = 0;
   std::cout << std::endl;
@@ -162,7 +169,9 @@ void UIController::selectTree() {
   if (index == 0) return;
   std::stringstream ss;
   ss << index;
-  std::cout << "[" + ss.str() + "] " << getAncestorNameByTreeIndex(selectedTreeIndex) << "'s is selected." << std::endl;
+  std::cout << "[" + ss.str() + "] "
+            << getAncestorNameByTreeIndex(selectedTreeIndex)
+            << "'s family tree is selected." << std::endl;
   expandMenu(getOneTreeMenuPtr(getAncestorNameByTreeIndex(selectedTreeIndex) + "'s family tree"));
 }
 
@@ -221,23 +230,29 @@ std::shared_ptr<Menu> UIController::getOneTreeMenuPtr(const std::string &descrip
 
 void UIController::displayTree() {
   printPersonTree(trees[selectedTreeIndex]->SelectPerson("1"));
-  std::cout << "Please select an index from:" << std::endl;
-  trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
-    std::cout << "[" << onePersonPtr->Id() << "] " << onePersonPtr->Name() << std::endl;
-  });
 }
 
 void UIController::selectPerson() {
-  selectPersonIndex();
+  auto selectedPersonPtr = selectPersonIndex();
   if (selectedPersonPtr == nullptr) return;
-  std::string personDescription = selectedPersonPtr->Name();
-  std::cout << "[" + selectedPersonPtr->Id() + "] " + personDescription << " is selected." << std::endl;
-  expandMenu(getOnePersonMenuPtr(personDescription));
+  std::string name = selectedPersonPtr->Name();
+  std::cout << "[" + selectedPersonPtr->Id() + "] "
+            << name
+            << " is selected."
+            << std::endl;
+  expandMenu(getOnePersonMenuPtr(name, selectedPersonPtr));
 }
 
-void UIController::selectPersonIndex() {
+std::shared_ptr<const Person> UIController::selectPersonIndex() {
   displayTree();
+  std::cout << "Please select an index from:" << std::endl;
+  trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
+    std::cout << "[" + onePersonPtr->Id() + "] "
+              << onePersonPtr->Name()
+              << std::endl;
+  });
   std::cout << std::endl;
+  std::shared_ptr<const Person> selectedPersonPtr(nullptr);
   UIPtr->input([&](const std::string &inputStr) -> std::string {
     std::ptrdiff_t inputIndex = 0;
     std::stringstream ss(inputStr);
@@ -249,9 +264,10 @@ void UIController::selectPersonIndex() {
     if (onePersonPtr == nullptr) {
       return "Person [" + ss.str() + "] doesn't exist. Please choose an existing person.";
     }
-    selectedPersonPtr = const_cast<Person *>(onePersonPtr.get());
+    selectedPersonPtr = onePersonPtr;
     return "";
   }, "[Person Index]");
+  return selectedPersonPtr;
 }
 
 void UIController::searchTreeForPeopleByName() {
@@ -270,57 +286,73 @@ void UIController::searchTreeForPeopleByName() {
   for (auto &oneId : ids) {
     auto onePersonPtr = trees[selectedTreeIndex]->SelectPerson(oneId);
     if (onePersonPtr == nullptr) continue;
-    std::cout << "[" << oneId << "] " << onePersonPtr->Name() << std::endl;
+    std::cout << "[" + oneId + "] "
+              << onePersonPtr->Name()
+              << std::endl;
   }
 }
 
-std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &description) {
-  auto onePersonMenuPtr = createMenuPtr(description);
+inline bool UIController::personIsMale(std::shared_ptr<const Person> personPtr) {
+  return personPtr->Gender() == Person::PersonGender::MALE;
+}
+
+std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &name, std::shared_ptr<const Person> personPtr) {
+  auto onePersonMenuPtr = createMenuPtr(name);
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("die", "(d) Mark " + description + " dead", die, false)
+    CREATE_COMMAND_ITEM("die", "(d) Mark " + name + " dead", die, false)
   );
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("d", "(d) Mark " + description + " dead", die, true)
+    CREATE_COMMAND_ITEM("d", "(d) Mark " + name + " dead", die, true)
   );
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("addch", "(a) Add a child to " + description, addChild, false)
+    CREATE_COMMAND_ITEM("addch", "(a) Add a child to " + name, addChild, false)
   );
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("a", "(a) Add a child to " + description, addChild, true)
+    CREATE_COMMAND_ITEM("a", "(a) Add a child to " + name, addChild, true)
   );
 
 /* --------------------- Submenu: Check out relatives information --------------------- */
-  std::string checkoutRalativesInfoSubMenuDescription = "Check out relatives of " + description;
+  std::string checkoutRalativesInfoSubMenuDescription = "Check out relatives of " + name;
   auto checkoutRalativesInfoSubMenuPtr = createMenuPtr(checkoutRalativesInfoSubMenuDescription);
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("mother", "(mo) Check out the mother of " + description, checkoutMother, false)
+    CREATE_COMMAND_ITEM("mother", "(mo) Check out the mother of " + name, checkoutMother, false)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("mo", "(mo) Check out the mother of " + description, checkoutMother, true)
+    CREATE_COMMAND_ITEM("mo", "(mo) Check out the mother of " + name, checkoutMother, true)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("father", "(fa) Check out the father of " + description, checkoutFather, false)
+    CREATE_COMMAND_ITEM("father", "(fa) Check out the father of " + name, checkoutFather, false)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("fa", "(fa) Check out the father of " + description, checkoutFather, true)
+    CREATE_COMMAND_ITEM("fa", "(fa) Check out the father of " + name, checkoutFather, true)
+  );
+  if (personIsMale(personPtr)) {
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("wife", "(wi) Check out the wife of " + name, checkoutCouple, false)
+    );
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("wi", "(wi) Check out the wife of " + name, checkoutCouple, true)
+    );
+  } else {
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("husband", "(hs) Check out the husband of " + name, checkoutCouple, false)
+    );
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("hs", "(hs) Check out the husband of " + name, checkoutCouple, true)
+    );
+  }
+  
+  checkoutRalativesInfoSubMenuPtr->addOp(
+    CREATE_COMMAND_ITEM("siblings", "(si) Check out the siblings of " + name, checkoutSilbings, false)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("wife", "(wi) Check out the wife of " + description, checkoutCouple, false)
+    CREATE_COMMAND_ITEM("si", "(si) Check out the siblings of " + name, checkoutSilbings, true)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("wi", "(wi) Check out the wife of " + description, checkoutCouple, true)
+    CREATE_COMMAND_ITEM("children", "(ch) Check out the children of " + name, checkoutChildren, false)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("sibling", "(si) Check out the siblings of " + description, checkoutSilbings, false)
-  );
-  checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("si", "(si) Check out the siblings of " + description, checkoutSilbings, true)
-  );
-  checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("children", "(ch) Check out the children of " + description, checkoutChildren, false)
-  );
-  checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("ch", "(ch) Check out the children of " + description, checkoutChildren, true)
+    CREATE_COMMAND_ITEM("ch", "(ch) Check out the children of " + name, checkoutChildren, true)
   );
 
   onePersonMenuPtr->addOp(
@@ -332,26 +364,46 @@ std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &descr
 /* ------------------------------------------------------------------ */
 
 /* --------------------- Submenu: Marriage management --------------------- */
-  std::string marriageOpDescription = "Marriage management on " + description;
+  std::string marriageOpDescription = "Marriage management on " + name;
   auto marriageOpSubMenuPtr = createMenuPtr(marriageOpDescription);
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("wife", "(wi) Check out the wife of " + description, checkoutCouple, false)
-  );
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("wi", "(wi) Check out the wife of " + description, checkoutCouple, true)
-  );
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("exwife", "(ex) Check out the exwives of " + description, checkoutExWives, false)
-  );
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("ex", "(ex) Check out the exwives of " + description, checkoutExWives, true)
-  );
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("marry", "Add information about the woman married by " + description, marry, false)
-  );
-  marriageOpSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("divorce", "Mark divorced " + description, divorce, false)
-  );
+  if (personIsMale(personPtr)) {
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("wife", "(wi) Check out the wife of " + name, checkoutCouple, false)
+    );
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("wi", "(wi) Check out the wife of " + name, checkoutCouple, true)
+    );
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("exwife", "(ex) Check out the exwives of " + name, checkoutExWives, false)
+    );
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("ex", "(ex) Check out the exwives of " + name, checkoutExWives, true)
+    );
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("marry", "(m) Add information about the woman married by " + name, marry, false)
+    );
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("m", "(m) Add information about the woman married by " + name, marry, true)
+    );
+  } else {
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("husband", "(hs) Check out the husband of " + name, checkoutCouple, false)
+    );
+    checkoutRalativesInfoSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("hs", "(hs) Check out the husband of " + name, checkoutCouple, true)
+    );
+  }
+  auto original = trees[selectedTreeIndex]->SelectPerson();
+  trees[selectedTreeIndex]->SelectPerson(personPtr->Id());
+  if (trees[selectedTreeIndex]->GetCouple()) {
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("divorce", "(d) Mark " + name + " divorced", divorce, false)
+    );
+    marriageOpSubMenuPtr->addOp(
+      CREATE_COMMAND_ITEM("d", "(d) Mark " + name + " divorced", divorce, true)
+    );
+  }
+  trees[selectedTreeIndex]->SelectPerson(original->Id());
 
   onePersonMenuPtr->addOp(
     CREATE_SUB_MENU("marriage", "(m) " + marriageOpDescription, marriageOpSubMenuPtr, false)
@@ -365,37 +417,117 @@ std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &descr
 }
 
 void UIController::die() {
-  trees[selectedTreeIndex]->SelectPerson(selectedPersonPtr->Id());
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  if (not UIPtr->confirm("Marking his death is non-invertible. Type y to confirm or other characters to quit.")) {
+    return;
+  }
   bool success = trees[selectedTreeIndex]->Die();
   if (success) {
-    std::cout << "OK, " << selectedPersonPtr->Name() << " is now marked dead. RIP" << std::endl;
+    std::cout << "OK, "
+              << selectedPersonPtr->Name()
+              << " is now marked dead. RIP"
+              << std::endl;
     return;
   }
   auto error = trees[selectedTreeIndex]->GetError();
   if (FamilyTree::Error::WRONG_LOGIC == error) {
-    std::cout << selectedPersonPtr->Name() << " has been marked dead. Give him a break!" << std::endl;
+    std::cout << selectedPersonPtr->Name()
+              << " has been marked dead. Give "
+              << (personIsMale(selectedPersonPtr) ? "him" : "her")
+              << " a break!"
+              << std::endl;
+  } else {
+    std::cerr << "Unexpected Die Error" << std::endl;
   }
 }
 void UIController::marry() {
-  trees[selectedTreeIndex]->SelectPerson(selectedPersonPtr->Id());
-  std::cout << "Please input the wife's name"
-  UIPtr->input([&](const std::string &inputStr) -> std::string {
-    ids.clear();
-    trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
-      if (onePersonPtr->Name() != inputStr) return;
-      ids.push_back(onePersonPtr->Id());
-    });
-    if (ids.empty()) {
-      std::cout << "There doesn't seem to be anybody called [" + inputStr + "] in this family tree." << std::endl;
-    }
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  std::cout << "Please input the wife's name" << std::endl;
+  std::string wifeName = UIPtr->input([&](const std::string &inputStr) -> std::string {
     return "";
-  }, "[name]");
+  }, "[wife's name]");
+  std::stringstream ss;
+  ss << treesPeopleTotal[selectedTreeIndex] + 1;
+  auto wifePtr = trees[selectedTreeIndex]->Marry(Person::Info(ss.str(), wifeName));
+  if (wifePtr) {
+    ++treesPeopleTotal[selectedTreeIndex];
+    std::cout << wifePtr->Name()
+              << " is recorded as married to "
+              << selectedPersonPtr->Name() << "."
+              << std::endl;
+    return;
+  }
+  auto error = trees[selectedTreeIndex]->GetError();
+  if (FamilyTree::Error::WRONG_LOGIC == error) {
+    std::cout << selectedPersonPtr->Name()
+              << " is married. He would not like to be a second Makoto kun in School Days!"
+              << std::endl;
+  } else {
+    std::cerr << "Unexpected Marry Error" << std::endl;
+  }
 }
 void UIController::divorce() {
-  std::cout << "divorce: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto counterpartPtr = trees[selectedTreeIndex]->GetCouple();
+  if (counterpartPtr == nullptr) {
+    std::cout << "Single dog should get married first to divorce." << std::endl;
+    return;
+  }
+  
+  if (not UIPtr->confirm("Divorcing " + counterpartPtr->Name() + " is non-invertible. Type y to confirm or other characters to quit.")) {
+    return;
+  }
+  bool success = trees[selectedTreeIndex]->Divorce();
+  if (success) {
+    std::cout << "Divorced " + counterpartPtr->Name() + " successfully." << std::endl;
+    return;
+  }
+  auto error = trees[selectedTreeIndex]->GetError();
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << selectedPersonPtr->Name()
+              << " is not a parent."
+              << std::endl;
+  } else if (FamilyTree::Error::WRONG_LOGIC == error) {
+    std::cout << "Single dog should get married first to divorce." << std::endl;
+  } else {
+    std::cerr << "Unexpected Divorce Error" << std::endl;
+  }
 }
 void UIController::addChild() {
-  std::cout << "addChild: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  std::cout << "Please input the child's name" << std::endl;
+  std::string childName = UIPtr->input([&](const std::string &inputStr) -> std::string {
+    return "";
+  }, "[child's name]");
+  std::cout << "Please input the child's gender, f for female and m for male" << std::endl;
+  std::string childGender = UIPtr->input([&](const std::string &inputStr) -> std::string {
+    if (inputStr != "f" or inputStr != "m") {
+      return "Please answer f or m";
+    }
+    return "";
+  }, "[gender(f/m)]");
+  auto gender = (childGender == "f" ? Person::PersonGender::FEMALE : Person::PersonGender::MALE);
+  std::stringstream ss;
+  ss << treesPeopleTotal[selectedTreeIndex] + 1;
+  auto childPtr = trees[selectedTreeIndex]->GiveBirthTo(Person::Info(ss.str(), gender));
+  if (childPtr) {
+    ++treesPeopleTotal[selectedTreeIndex];
+    std::cout << childPtr->Name()
+              << " is recorded as the child of "
+              << selectedPersonPtr->Name() << "."
+              << std::endl;
+    return;
+  }
+  auto error = trees[selectedTreeIndex]->GetError();
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << selectedPersonPtr->Name()
+              << " is not a parent."
+              << std::endl;
+  } else if (FamilyTree::Error::WRONG_LOGIC == error) {
+    std::cout << "Single dog should get married first to divorce." << std::endl;
+  } else {
+    std::cerr << "Unexpected Add child Error" << std::endl;
+  }
 }
 void UIController::checkoutMother() {
   std::cout << "checkoutMother: hai mei zuo ne" << std::endl;
