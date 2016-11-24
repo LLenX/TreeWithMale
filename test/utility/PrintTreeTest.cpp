@@ -1,4 +1,6 @@
-#include "utitlity/printTree.hpp"
+#include "utility/PrintTree.hpp"
+#include "FamilyTree.hpp"
+#include <iostream>
 
 int main() {
     FamilyTree tree;
@@ -20,10 +22,13 @@ int main() {
     tree.GiveBirthTo(Person::Info("s2:2", "2:2"), Person::PersonGender::MALE);
     tree.GiveBirthTo(Person::Info("s2:3", "2:3"), Person::PersonGender::MALE);
     std::cout << "2's sons: " << tree.SelectPerson() << std::endl;
-    tree.SelectPerson("b3");
+    auto b3 = tree.SelectPerson("b3");
     tree.Marry(Person::Info("w3", "w3"));
     tree.GiveBirthTo(Person::Info("s3:1", "3:1"), Person::PersonGender::MALE);
     tree.GiveBirthTo(Person::Info("s3:2", "3:2"), Person::PersonGender::MALE);
     tree.GiveBirthTo(Person::Info("s3:3", "3:3"), Person::PersonGender::MALE);
     printFamilyTree(tree);
+    printPersonTree(someone);
+    printPersonTree(b3);
+    printPersonTree(tree.SelectPerson("s3:1"));
 }

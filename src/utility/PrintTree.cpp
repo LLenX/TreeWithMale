@@ -27,7 +27,7 @@ std::ostream &operator<<(std::ostream &out,
     return out;
 }
 
-std::shared_ptr<const Person> getAncester(FamilyTree &tree) {
+std::shared_ptr<const Person> getAncestor(FamilyTree &tree) {
     auto current_person_save = tree.SelectPerson();
     if (current_person_save == nullptr &&
         tree.GetError() == FamilyTree::Error::RESULT_NOT_FOUND)
@@ -156,8 +156,7 @@ void PrintProcess(PrintMap treeMap) {
     }
 }
 
-PrintMap PrintPreProcess(FamilyTree& tree) {
-    auto ancestor = getAncester(tree);
+PrintMap PrintPreProcess(std::shared_ptr<const Person> ancestor) {
     std::queue<std::shared_ptr<const Person>> queue;
     PrintMap treeMap;
     treeMap.reset(new std::vector<std::vector<printStruct>>);
@@ -173,7 +172,14 @@ void printFamilyTree(FamilyTree &tree) {
     if (current_person_save == nullptr &&
             tree.GetError() == FamilyTree::Error::RESULT_NOT_FOUND)
         return;
-    auto treeMap = PrintPreProcess(tree);
+    auto treeMap = PrintPreProcess(getAncestor(tree));
+    initOffset(treeMap);
+    PrintProcess(treeMap);
+    tree.SelectPerson(current_person_save->Id());
+}
+
+void printPersonTree(std::shared_ptr<const Person> someone) {
+    auto treeMap = PrintPreProcess(someone);
     initOffset(treeMap);
     PrintProcess(treeMap);
 }

@@ -44,6 +44,7 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
     add_executable(PrintTree
             ${PROJECT_SOURCE_DIR}/test/utility/PrintTreeTest.cpp
             ${PERSON_SOURCE}
+            ${PROJECT_SOURCE_DIR}/src/FamilyTree.cpp
             ${PROJECT_SOURCE_DIR}/src/utility/PrintTree.cpp)
     set_target_properties(PrintTree PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin)

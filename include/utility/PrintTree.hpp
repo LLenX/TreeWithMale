@@ -1,6 +1,7 @@
 #ifndef PRINTTREE_HPP
 #define PRINTTREE_HPP
 #include "FamilyTree.hpp"
+#include <iostream>
 
 
 /*
@@ -10,13 +11,7 @@
  *  line and the first character of this person.
  * child is the position of the child in the print map
  */
-struct printStruct {
-    using Person_p = std::shared_ptr<const Person>;
-    Person_p person;
-    int offset;
-    int child[100];
-    printStruct(Person_p person_, int offset_ = 0): person(person_), offset(offset_), child(0) {}
-};
+struct printStruct;
 
 /*
  * overload the out stream operator << for the shared_ptr<const Person>
@@ -28,7 +23,7 @@ struct printStruct {
 std::ostream &operator<<(std::ostream &out,
                         std::shared_ptr<const Person> someone);
 
-std::size_t PERSON_NAME_MAX_LENGTH = 9;
+static std::size_t PERSON_NAME_MAX_LENGTH = 9;
 
 /*
  * Set the max length of a name
@@ -41,6 +36,8 @@ void setOutLength(std::size_t length);
  */
 std::shared_ptr<const Person> getAncester(FamilyTree &tree);
 
+void printFamilyTree(FamilyTree &tree);
 
+void printPersonTree(std::shared_ptr<const Person> someone);
 
 #endif /* PrintTree.hpp */
