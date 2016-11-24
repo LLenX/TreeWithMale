@@ -44,4 +44,6 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
 endif ()
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ SOURCE_FILES)
-add_executable(TreeWithMale ${PERSON_SOURCE} ${SOURCE_FILES})
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/UI UI_SOURCE)
+
+add_executable(TreeWithMale ${PERSON_SOURCE} ${SOURCE_FILES} ${UI_SOURCE})
