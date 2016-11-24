@@ -35,6 +35,7 @@ class MenuItem {
            CmdFunc i_cmdFunc,
            bool i_isShortcut = false);
   void exec() const;
+  bool isSubMenu() const;
  private:
   ItemPtr item;
   const MenuItemType type;

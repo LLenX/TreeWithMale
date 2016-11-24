@@ -17,10 +17,10 @@ std::shared_ptr<UI> UI::getInstancePtr() {
   return instancePtr;
 }
 
-static void trim(std::string &str) {
+static void trim(std::string &str, char trimmedChar = ' ') {
   if (0 == str.length()) return;
-  std::string::size_type start = str.find_first_not_of(' '),
-                         end = str.find_last_not_of(' ');
+  std::string::size_type start = str.find_first_not_of(trimmedChar),
+                         end = str.find_last_not_of(trimmedChar);
   if (start != std::string::npos) {
     str = str.substr(start, end - start + 1);
   } else {
@@ -32,6 +32,7 @@ std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
                         const std::string &message) {
   std::string oneLine, failedPrompt,
               promptMsg = message.length() ? message : defaultPrompt;
+  auto lengthBeforeTrimmed = oneLine.length();
   while (true) {
 #ifdef WIN32
     std::cout << promptMsg << std::flush;
@@ -39,7 +40,11 @@ std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
 #else  // defined WIN32
     oneLine = prompt(promptMsg);
 #endif  // not defined WIN32
-    trim(oneLine);
+    do {
+      lengthBeforeTrimmed = oneLine.length();
+      trim(oneLine, ' '), trim(oneLine, '\t');
+    } while (oneLine.length() != lengthBeforeTrimmed);
+
     if (0 == oneLine.length()) continue;
     std::cout << std::endl;
     failedPrompt = isValid(oneLine);
@@ -57,5 +62,10 @@ void UI::oneLoop() {
       return "Omoshiroi Operation. Please try a valid one next time.";
     }
   });
+  if (curMenuPtr->opIsSubMenu(operation)) {
+    curMenuPtr = curMenuPtr->getSubMenuPtrOf(operation);
+    menuStack.push(curMenuPtr);
+    std::cout << std::endl;
+  }
   curMenuPtr->execOp(operation);
 }
