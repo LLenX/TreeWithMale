@@ -473,7 +473,6 @@ void UIController::divorce() {
     std::cout << "Single dog should get married first to divorce." << std::endl;
     return;
   }
-  
   if (not UIPtr->confirm("Divorcing " + counterpartPtr->Name() + " is non-invertible. Type y to confirm or other characters to quit.")) {
     return;
   }
@@ -495,13 +494,18 @@ void UIController::divorce() {
 }
 void UIController::addChild() {
   auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto counterpartPtr = trees[selectedTreeIndex]->GetCouple();
+  if (counterpartPtr == nullptr) {
+    std::cout << "Single dog should get married first to add child." << std::endl;
+    return;
+  }
   std::cout << "Please input the child's name" << std::endl;
   std::string childName = UIPtr->input([&](const std::string &inputStr) -> std::string {
     return "";
   }, "[child's name]");
   std::cout << "Please input the child's gender, f for female and m for male" << std::endl;
   std::string childGender = UIPtr->input([&](const std::string &inputStr) -> std::string {
-    if (inputStr != "f" or inputStr != "m") {
+    if (inputStr != "f" and inputStr != "m") {
       return "Please answer f or m";
     }
     return "";
@@ -509,7 +513,7 @@ void UIController::addChild() {
   auto gender = (childGender == "f" ? Person::PersonGender::FEMALE : Person::PersonGender::MALE);
   std::stringstream ss;
   ss << treesPeopleTotal[selectedTreeIndex] + 1;
-  auto childPtr = trees[selectedTreeIndex]->GiveBirthTo(Person::Info(ss.str(), gender));
+  auto childPtr = trees[selectedTreeIndex]->GiveBirthTo(Person::Info(ss.str(), childName), gender);
   if (childPtr) {
     ++treesPeopleTotal[selectedTreeIndex];
     std::cout << childPtr->Name()

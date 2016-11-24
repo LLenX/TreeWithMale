@@ -18,8 +18,10 @@ struct printStruct {
     int offset, parent, child_num;
     printStruct(Person_p person_, int parent_ = -1)
         : person(person_), parent(parent_), offset(0) {
-        child_num =
-            std::dynamic_pointer_cast<const Parent>(person)->Children()->size();
+        if (person->Gender() == Person::PersonGender::MALE) {
+            child_num =
+                std::dynamic_pointer_cast<const Parent>(person)->Children()->size();
+        }
     }
 };
 using PrintMap = std::shared_ptr<std::vector<std::vector<printStruct>>>;
@@ -70,11 +72,13 @@ void VisitByLevel(std::queue<std::shared_ptr<const Person>>& queue,
     int parent_pos = 0;
     while (!queue.empty()) {
         auto front = queue.front();
-        for (auto item :
-            *std::dynamic_pointer_cast<const Parent>(front)->Children()) {
-            auto cur_person = std::dynamic_pointer_cast<const Person>(item);
-            next_level.push(cur_person);
-            treeMap->back().push_back(printStruct(cur_person, parent_pos));
+        if (front->Gender() == Person::PersonGender::MALE) {
+            for (auto item :
+                *std::dynamic_pointer_cast<const Parent>(front)->Children()) {
+                auto cur_person = std::dynamic_pointer_cast<const Person>(item);
+                next_level.push(cur_person);
+                treeMap->back().push_back(printStruct(cur_person, parent_pos));
+            }
         }
         ++parent_pos;
         queue.pop();
@@ -195,9 +199,12 @@ void PrintProcess(PrintMap treeMap) {
         //  ptint the fourth line
         printOneLine(current_level,
                     [](printStruct& printObj, int& base, bool first)->void {
-            auto couple
-                    = std::dynamic_pointer_cast<const Parent>(
-                        printObj.person)->Couple();
+            std::shared_ptr<const Parent> couple;
+            if (printObj.person->Gender() == Person::PersonGender::MALE) {
+                couple = std::dynamic_pointer_cast<const Parent>(printObj.person)->Couple();
+            } else {
+                couple = nullptr;
+            }
             int offset = printObj.offset - base;
             if (offset < 0) offset = 0;
             std::cout << std::string(first ? printObj.offset : offset, ' ');
