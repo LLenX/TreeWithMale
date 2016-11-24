@@ -28,14 +28,14 @@ static void trim(std::string &str, char trimmedChar = ' ') {
   }
 }
 
-std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
+std::string UI::input(std::function<std::string(const std::string &)> isValid,
                         const std::string &message) {
   std::string oneLine, failedPrompt,
               promptMsg = message.length() ? message : defaultPrompt;
   auto lengthBeforeTrimmed = oneLine.length();
   while (true) {
     if (std::cin.eof()) {
-      return std::move(std::string("q"));
+      return std::string("q");
     }
 #ifdef WIN32
     std::cout << promptMsg << std::flush;
@@ -54,7 +54,7 @@ std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
     if (0 == failedPrompt.length()) break;
     std::cout << failedPrompt << std::endl << std::endl;
   }
-  return std::move(oneLine);
+  return oneLine;
 }
 
 void UI::oneLoop() {

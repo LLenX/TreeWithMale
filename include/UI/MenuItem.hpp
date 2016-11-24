@@ -29,11 +29,11 @@ class MenuItem {
   MenuItem(MenuItemType i_type,
            const std::string &i_key, const std::string &i_description,
            std::shared_ptr<Menu> i_subMenuPtr,
-           bool i_isShortcut = false);
+           bool i_isShortcut = false, bool isCtrl = false);
   MenuItem(MenuItemType i_type,
            const std::string &i_key, const std::string &i_description,
            CmdFunc i_cmdFunc,
-           bool i_isShortcut = false);
+           bool i_isShortcut = false, bool isCtrl = false);
   void exec() const;
   bool isSubMenu() const;
  private:
@@ -42,6 +42,7 @@ class MenuItem {
   const std::string key;
   const std::string description;
   const bool isShortcut;
+  const bool isCtrl;
 };
 
 #endif  // TREEWITHMALE_UI_MENUITEM_HPP_

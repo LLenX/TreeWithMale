@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include "./FamilyTree.hpp"
+#include "./utility/PrintTree.hpp"
 #include "./UI/MenuItem.hpp"
 #include "./UI/Menu.hpp"
 #include "./UI/UI.hpp"
@@ -13,6 +14,10 @@ using MenuItemType::SubMenu;
 #define CREATE_COMMAND_ITEM(op, description, func, isShortcut) (std::shared_ptr<MenuItem>(new MenuItem(Command, op, description, [&]() -> void { \
   func(); \
 }, isShortcut)))
+
+#define CREATE_CONTROL_ITEM(op, description, func, isShortcut) (std::shared_ptr<MenuItem>(new MenuItem(Command, op, description, [&]() -> void { \
+  func(); \
+}, isShortcut, true)))
 
 #define CREATE_SUB_MENU(op, description, SubMenuPtr, isShortcut) (std::shared_ptr<MenuItem>(new MenuItem(SubMenu, op, description, SubMenuPtr, isShortcut)))
 
@@ -58,7 +63,7 @@ void UIController::init() {
 
 void UIController::quit() {
   started = false;
-  std::cout << "Goodbye Kugou!\n" << std::endl;
+  std::cout << "Goodbye!" << std::endl;
 }
 
 void UIController::back() {
@@ -85,19 +90,23 @@ void UIController::displayTreesInfo() {
 }
 
 const std::string &UIController::getAncestorNameByTreeIndex(std::size_t index) {
-  return trees[index]->SelectPerson("1")->Name();
+  auto original = trees[index]->SelectPerson();
+  const auto &name = trees[index]->SelectPerson("1")->Name();
+  trees[index]->SelectPerson(original->Id());
+  return name;
 }
 
 void UIController::createNewTree() {
-  std::shared_ptr<FamilyTree> newTree(new FamilyTree());
-  trees.push_back(newTree);
   std::string name = UIPtr->input([&](const std::string &inputStr) -> std::string {
     std::string ret = inputStr;
     ret.clear();
     return ret;
   }, "[Ancestor's Name]");
-  newTree->CreateAncestor({"1", name});
+
+  std::shared_ptr<FamilyTree> newTree(new FamilyTree());
   selectedTreeIndex = trees.size();
+  trees.push_back(newTree);
+  newTree->CreateAncestor(Person::Info("1", name));
   ++treesNum;
   std::cout << name << "'s family tree was created successfully." << std::endl;
   std::stringstream ss;
@@ -153,30 +162,30 @@ void UIController::selectTree() {
   if (index == 0) return;
   std::stringstream ss;
   ss << index;
-  std::cout << "[" + ss.str() + "] " << getAncestorNameByTreeIndex(selectedTreeIndex) << "'s was selected." << std::endl;
+  std::cout << "[" + ss.str() + "] " << getAncestorNameByTreeIndex(selectedTreeIndex) << "'s is selected." << std::endl;
   expandMenu(getOneTreeMenuPtr(getAncestorNameByTreeIndex(selectedTreeIndex) + "'s family tree"));
 }
 
 std::shared_ptr<Menu> UIController::createMenuPtr(const std::string &description, bool needsBack) {
   auto oneMenuPtr = std::shared_ptr<Menu>(new Menu(description));
   oneMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("help", "(h) Show current menu", showCurMenu, false)
+    CREATE_CONTROL_ITEM("help", "(h) Show current menu", showCurMenu, false)
   );
   oneMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("h", "(h) Show current menu", showCurMenu, true)
+    CREATE_CONTROL_ITEM("h", "(h) Show current menu", showCurMenu, true)
   );
   oneMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("quit", "(q) Quit", quit, false)
+    CREATE_CONTROL_ITEM("quit", "(q) Quit", quit, false)
   );
   oneMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("q", "(q) Quit", quit, true)
+    CREATE_CONTROL_ITEM("q", "(q) Quit", quit, true)
   );
   if (needsBack) {
     oneMenuPtr->addOp(
-      CREATE_COMMAND_ITEM("back", "(b) Back", back, false)
+      CREATE_CONTROL_ITEM("back", "(b) Back", back, false)
     );
     oneMenuPtr->addOp(
-      CREATE_COMMAND_ITEM("b", "(b) Back", back, true)
+      CREATE_CONTROL_ITEM("b", "(b) Back", back, true)
     );
   }
   return oneMenuPtr;
@@ -211,14 +220,18 @@ std::shared_ptr<Menu> UIController::getOneTreeMenuPtr(const std::string &descrip
 }
 
 void UIController::displayTree() {
-  std::cout << "hai mei zuo ne" << std::endl;
+  printPersonTree(trees[selectedTreeIndex]->SelectPerson("1"));
+  std::cout << "Please select an index from:" << std::endl;
+  trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
+    std::cout << "[" << onePersonPtr->Id() << "] " << onePersonPtr->Name() << std::endl;
+  });
 }
 
 void UIController::selectPerson() {
   selectPersonIndex();
   if (selectedPersonPtr == nullptr) return;
-  std::string personDescription = "[" + selectedPersonPtr->Id() + "] " + selectedPersonPtr->Name();
-  std::cout << personDescription << " was selected." << std::endl;
+  std::string personDescription = selectedPersonPtr->Name();
+  std::cout << "[" + selectedPersonPtr->Id() + "] " + personDescription << " is selected." << std::endl;
   expandMenu(getOnePersonMenuPtr(personDescription));
 }
 
@@ -236,22 +249,21 @@ void UIController::selectPersonIndex() {
     if (onePersonPtr == nullptr) {
       return "Person [" + ss.str() + "] doesn't exist. Please choose an existing person.";
     }
-    selectedPersonPtr.reset(const_cast<Person *>(onePersonPtr.get()));
+    selectedPersonPtr = const_cast<Person *>(onePersonPtr.get());
     return "";
   }, "[Person Index]");
 }
 
 void UIController::searchTreeForPeopleByName() {
-  std::cout << std::endl;
   std::vector<std::string> ids;
   UIPtr->input([&](const std::string &inputStr) -> std::string {
     ids.clear();
-    trees[selectedTreeIndex]->Traverse([&](const auto &pair) -> void {
-      if (pair.second->Name() != inputStr) return;
-      ids.push_back(pair.second->Id());
+    trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
+      if (onePersonPtr->Name() != inputStr) return;
+      ids.push_back(onePersonPtr->Id());
     });
     if (ids.empty()) {
-      return "There doesn't seem to be anybody called [" + inputStr + "] in this family tree. Please try another name.";
+      std::cout << "There doesn't seem to be anybody called [" + inputStr + "] in this family tree." << std::endl;
     }
     return "";
   }, "[name]");
@@ -265,20 +277,26 @@ void UIController::searchTreeForPeopleByName() {
 std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &description) {
   auto onePersonMenuPtr = createMenuPtr(description);
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("die", "Mark dead " + description, die, false)
+    CREATE_COMMAND_ITEM("die", "(d) Mark " + description + " dead", die, false)
   );
   onePersonMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("child", "Add a child to " + description, addChild, false)
+    CREATE_COMMAND_ITEM("d", "(d) Mark " + description + " dead", die, true)
+  );
+  onePersonMenuPtr->addOp(
+    CREATE_COMMAND_ITEM("addch", "(a) Add a child to " + description, addChild, false)
+  );
+  onePersonMenuPtr->addOp(
+    CREATE_COMMAND_ITEM("a", "(a) Add a child to " + description, addChild, true)
   );
 
 /* --------------------- Submenu: Check out relatives information --------------------- */
-  std::string checkoutRalativesInfoSubMenuDescription = "Check out relatives information of " + description;
+  std::string checkoutRalativesInfoSubMenuDescription = "Check out relatives of " + description;
   auto checkoutRalativesInfoSubMenuPtr = createMenuPtr(checkoutRalativesInfoSubMenuDescription);
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("mother", "(mom) Check out the mother of " + description, checkoutMother, false)
+    CREATE_COMMAND_ITEM("mother", "(mo) Check out the mother of " + description, checkoutMother, false)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("mom", "(mom) Check out the mother of " + description, checkoutMother, true)
+    CREATE_COMMAND_ITEM("mo", "(mo) Check out the mother of " + description, checkoutMother, true)
   );
   checkoutRalativesInfoSubMenuPtr->addOp(
     CREATE_COMMAND_ITEM("father", "(fa) Check out the father of " + description, checkoutFather, false)
@@ -347,10 +365,31 @@ std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &descr
 }
 
 void UIController::die() {
-  std::cout << "die: hai mei zuo ne" << std::endl;
+  trees[selectedTreeIndex]->SelectPerson(selectedPersonPtr->Id());
+  bool success = trees[selectedTreeIndex]->Die();
+  if (success) {
+    std::cout << "OK, " << selectedPersonPtr->Name() << " is now marked dead. RIP" << std::endl;
+    return;
+  }
+  auto error = trees[selectedTreeIndex]->GetError();
+  if (FamilyTree::Error::WRONG_LOGIC == error) {
+    std::cout << selectedPersonPtr->Name() << " has been marked dead. Give him a break!" << std::endl;
+  }
 }
 void UIController::marry() {
-  std::cout << "marry: hai mei zuo ne" << std::endl;
+  trees[selectedTreeIndex]->SelectPerson(selectedPersonPtr->Id());
+  std::cout << "Please input the wife's name"
+  UIPtr->input([&](const std::string &inputStr) -> std::string {
+    ids.clear();
+    trees[selectedTreeIndex]->Traverse([&](const auto &onePersonPtr) -> void {
+      if (onePersonPtr->Name() != inputStr) return;
+      ids.push_back(onePersonPtr->Id());
+    });
+    if (ids.empty()) {
+      std::cout << "There doesn't seem to be anybody called [" + inputStr + "] in this family tree." << std::endl;
+    }
+    return "";
+  }, "[name]");
 }
 void UIController::divorce() {
   std::cout << "divorce: hai mei zuo ne" << std::endl;

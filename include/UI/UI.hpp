@@ -19,7 +19,7 @@ class UI {
   std::shared_ptr<Menu> curMenuPtr = nullptr;
   std::stack<std::shared_ptr<Menu>> menuStack;
   UI();
-  std::string &&input(std::function<std::string(const std::string &)> isValid,
+  std::string input(std::function<std::string(const std::string &)> isValid,
                       const std::string &message = "");
   static constexpr const char *defaultPrompt = ">>>";
 };

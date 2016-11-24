@@ -21,7 +21,7 @@ class UIController {
   std::size_t selectedTreeIndex = 0;
   std::size_t treesNum = 0;
   bool started = false;
-  std::shared_ptr<Person> selectedPersonPtr;
+  Person *selectedPersonPtr;
 
   /* controllers */
   void init();

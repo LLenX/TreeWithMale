@@ -5,23 +5,23 @@
 using MenuItemType::Command;
 using MenuItemType::SubMenu;
 
-MenuItem::MenuItem(MenuItemType i_type,
-                   const std::string &i_key, const std::string &i_description,
+MenuItem::MenuItem(MenuItemType type,
+                   const std::string &key, const std::string &description,
                    std::shared_ptr<Menu> i_subMenuPtr,
-                   bool i_isShortcut)
-: type(i_type),
-  key(i_key), description(i_description),
-  isShortcut(i_isShortcut) {
+                   bool isShortcut, bool isCtrl)
+: type(type),
+  key(key), description(description),
+  isShortcut(isShortcut), isCtrl(isCtrl) {
   item.subMenuPtr = i_subMenuPtr;
 }
 
-MenuItem::MenuItem(MenuItemType i_type,
-                   const std::string &i_key, const std::string &i_description,
+MenuItem::MenuItem(MenuItemType type,
+                   const std::string &key, const std::string &description,
                    MenuItem::CmdFunc i_cmdFunc,
-                   bool i_isShortcut)
-: type(i_type),
-  key(i_key), description(i_description),
-  isShortcut(i_isShortcut) {
+                   bool isShortcut, bool isCtrl)
+: type(type),
+  key(key), description(description),
+  isShortcut(isShortcut), isCtrl(isCtrl) {
   item.commandFunc = i_cmdFunc;
 }
 

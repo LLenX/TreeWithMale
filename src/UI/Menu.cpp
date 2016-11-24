@@ -20,7 +20,14 @@ void Menu::show() const {
     std::cout << "No items available" << std::endl;
   } else {
     for (auto &oneItem : items) {
-      if (oneItem.second->isShortcut) continue;
+      if (oneItem.second->isShortcut or oneItem.second->isCtrl) continue;
+      std::cout << std::setw(static_cast<int>(maxOpWidth))
+                << oneItem.first << " - " << oneItem.second->description
+                << std::endl;
+    }
+    std::cout << std::endl;
+    for (auto &oneItem : items) {
+      if (oneItem.second->isShortcut or (not oneItem.second->isCtrl)) continue;
       std::cout << std::setw(static_cast<int>(maxOpWidth))
                 << oneItem.first << " - " << oneItem.second->description
                 << std::endl;
