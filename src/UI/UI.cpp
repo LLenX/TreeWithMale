@@ -34,6 +34,9 @@ std::string &&UI::input(std::function<std::string(const std::string &)> isValid,
               promptMsg = message.length() ? message : defaultPrompt;
   auto lengthBeforeTrimmed = oneLine.length();
   while (true) {
+    if (std::cin.eof()) {
+      return std::move(std::string("q"));
+    }
 #ifdef WIN32
     std::cout << promptMsg << std::flush;
     std::getline(std::cin, oneLine);
@@ -62,10 +65,11 @@ void UI::oneLoop() {
       return "Omoshiroi Operation. Please try a valid one next time.";
     }
   });
+  
+  curMenuPtr->execOp(operation);
   if (curMenuPtr->opIsSubMenu(operation)) {
     curMenuPtr = curMenuPtr->getSubMenuPtrOf(operation);
     menuStack.push(curMenuPtr);
-    std::cout << std::endl;
   }
-  curMenuPtr->execOp(operation);
+  
 }

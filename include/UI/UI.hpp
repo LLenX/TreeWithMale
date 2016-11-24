@@ -21,7 +21,7 @@ class UI {
   UI();
   std::string &&input(std::function<std::string(const std::string &)> isValid,
                       const std::string &message = "");
-  static constexpr const char *defaultPrompt = ">>> ";
+  static constexpr const char *defaultPrompt = ">>>";
 };
 
 #endif  // TREEWITHMALE_UI_HPP_
