@@ -150,7 +150,8 @@ void PrintProcess(PrintMap treeMap) {
 
         //  ptint the first line
         printOneLine(current_level,
-            [&parent](printStruct& printObj, int& base, bool first) ->void {
+            [&parent, level](printStruct& printObj, int& base, bool first) ->void {
+            if (!level) return;
             if (first) {
                 std::cout << std::string(
                                 printObj.offset + PERSON_NAME_MAX_LENGTH / 2,
@@ -168,7 +169,8 @@ void PrintProcess(PrintMap treeMap) {
 
         //  ptint the second line
         printOneLine(current_level,
-                    [](printStruct& printObj, int& base, bool first)->void {
+                    [level](printStruct& printObj, int& base, bool first)->void {
+            if (!level) return;
             if (first) {
                 std::cout << std::string(
                                 printObj.offset + PERSON_NAME_MAX_LENGTH / 2, ' ')
@@ -221,7 +223,7 @@ void PrintProcess(PrintMap treeMap) {
             int half = PERSON_NAME_MAX_LENGTH / 2;
             int offset = printObj.offset - base;
             if (offset < 0) offset = 0;
-            if (offset < 0) offset = 0;
+            if (first) offset = printObj.offset;
             std::cout << std::string(offset + half, ' ')
                       << (printObj.child_num ? '|' : ' ')
                       << std::string(half, ' '); 
