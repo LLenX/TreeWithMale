@@ -3,6 +3,7 @@
 
 #include "AllPerson.hpp"
 #include <unordered_map>
+#include <algorithm>
 
 /**
  * simply a manage of people of the whole family
@@ -46,6 +47,15 @@ class FamilyTree {
      * @return the error
      */
     Error GetError() const;
+
+    /**
+     * traverse the tree with visit
+     * @param visit a function recieving a parameter of std::shared_ptr<Person>
+     */
+    template<typename Visit>
+    void Traverse(Visit visit) const {
+        std::for_each(begin(person_record_), end(person_record_), visit);
+    }
 
     /**
      * create an ancestor for the family tree and select him if success, do
