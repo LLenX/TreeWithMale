@@ -54,7 +54,9 @@ class FamilyTree {
      */
     template<typename Visit>
     void Traverse(Visit visit) const {
-        std::for_each(begin(person_record_), end(person_record_), visit);
+        for (auto& id_person_pair : person_record_) {
+            visit(id_person_pair.second);
+        }
     }
 
     /**
