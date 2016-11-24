@@ -38,5 +38,9 @@ void MenuItem::exec() const {
   }
 }
 
+bool MenuItem::isSubMenu() const {
+  return type == SubMenu;
+}
+
 MenuItem::ItemPtr::ItemPtr() {}
 MenuItem::ItemPtr::~ItemPtr() {}

@@ -35,12 +35,22 @@ bool Menu::addOp(const std::shared_ptr<MenuItem> &menuItemPtr) {
   maxOpWidth = std::max(maxOpWidth, menuItemPtr->key.length());
   return true;
 }
+
 bool Menu::hasOp(const std::string &op) const {
   return items.find(op) != items.end();
 }
+
 void Menu::execOp(const std::string &op) const {
-  if (not hasOp(op)) {
-    return;
-  }
+  if (not hasOp(op)) return;
   items.at(op)->exec();
+}
+
+bool Menu::opIsSubMenu(const std::string &op) const {
+  if (not hasOp(op)) return false;
+  return items.at(op)->isSubMenu();
+}
+
+std::shared_ptr<Menu> Menu::getSubMenuPtrOf(const std::string &op) const {
+  if (not hasOp(op) || not opIsSubMenu(op)) return std::make_shared<Menu>(nullptr);
+  return items.at(op)->item.subMenuPtr;
 }

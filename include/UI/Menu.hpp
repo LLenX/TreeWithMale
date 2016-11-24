@@ -13,9 +13,11 @@ class Menu {
   bool addOp(const std::shared_ptr<MenuItem> &menuItemPtr);
   bool hasOp(const std::string &op) const;
   void execOp(const std::string &op) const;
+  bool opIsSubMenu(const std::string &op) const;
+  std::shared_ptr<Menu> getSubMenuPtrOf(const std::string &op) const;
  private:
   std::map<std::string, std::shared_ptr<MenuItem>> items;
-  std::string description = "Menu";
+  const std::string description = "Menu";
   std::size_t maxOpWidth = 0;
 };
 
