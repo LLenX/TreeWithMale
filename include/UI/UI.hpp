@@ -12,13 +12,13 @@ class UI {
  public:
   friend class UIController;
   static std::shared_ptr<UI> getInstancePtr();
-  void oneLoop();
   ~UI();
  private:
   std::shared_ptr<Menu> topMenuPtr;
   std::shared_ptr<Menu> curMenuPtr = nullptr;
   std::stack<std::shared_ptr<Menu>> menuStack;
   UI();
+  void oneLoop();
   std::string input(std::function<std::string(const std::string &)> isValid,
                       const std::string &message = "");
   bool confirm(const std::string &message);

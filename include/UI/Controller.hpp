@@ -12,6 +12,7 @@ class UIController {
  public:
   static std::shared_ptr<UIController> getInstancePtr();
   void start();
+  void resume();
   ~UIController();
  private:
   UIController();
@@ -55,7 +56,7 @@ class UIController {
   void checkoutSilbings();
   void checkoutChildren();
   void checkoutExWives();
-
+  void displaySubTree();
 };
 
 #endif  // TREEWITHMALE_UI_CONTROLLER_HPP_

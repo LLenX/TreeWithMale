@@ -1,12 +1,14 @@
 #include <memory>
 #include <iostream>
 #include <sstream>
+#include <signal.h>
 #include "./FamilyTree.hpp"
 #include "./utility/PrintTree.hpp"
 #include "./UI/MenuItem.hpp"
 #include "./UI/Menu.hpp"
 #include "./UI/UI.hpp"
 #include "./UI/Controller.hpp"
+#include "./UI/Terminal.hpp"
 
 using MenuItemType::Command;
 using MenuItemType::SubMenu;
@@ -21,12 +23,17 @@ using MenuItemType::SubMenu;
 
 #define CREATE_SUB_MENU(op, description, SubMenuPtr, isShortcut) (std::shared_ptr<MenuItem>(new MenuItem(SubMenu, op, description, SubMenuPtr, isShortcut)))
 
+void gracefullyExit(int sig);
+
 UIController::UIController()
 : UIPtr(UI::getInstancePtr()) {
   UIPtr->topMenuPtr = createMenuPtr("Main", false);
   UIPtr->curMenuPtr = UIPtr->topMenuPtr;
   UIPtr->topMenuPtr->addOp(
-    CREATE_COMMAND_ITEM("new", "Create a tree", createNewTree, false)
+    CREATE_COMMAND_ITEM("new", "(n) Create a tree", createNewTree, false)
+  );
+  UIPtr->topMenuPtr->addOp(
+    CREATE_COMMAND_ITEM("n", "(n) Create a tree", createNewTree, true)
   );
   UIPtr->topMenuPtr->addOp(
     CREATE_COMMAND_ITEM("select", "(s) Select one tree for further operations", selectTree, false)
@@ -34,7 +41,7 @@ UIController::UIController()
   UIPtr->topMenuPtr->addOp(
     CREATE_COMMAND_ITEM("s", "(s) Select one tree for further operations", selectTree, true)
   );
-  
+  signal(SIGSEGV, gracefullyExit);
 }
 
 UIController::~UIController() {}
@@ -44,14 +51,18 @@ std::shared_ptr<UIController> UIController::getInstancePtr() {
   return instancePtr;
 }
 
-void UIController::start() {
-  init();
+void UIController::resume() {
   std::cout << std::endl;
   showCurMenu();
   while (started) {
     std::cout << std::endl;
     UIPtr->oneLoop();
   }
+}
+
+void UIController::start() {
+  init();
+  resume();
 }
 
 /* controllers */
@@ -412,7 +423,9 @@ std::shared_ptr<Menu> UIController::getOnePersonMenuPtr(const std::string &name,
     CREATE_SUB_MENU("m", "(m) " + marriageOpDescription, marriageOpSubMenuPtr, true)
   );
 /* ------------------------------------------------------------------ */
-
+  onePersonMenuPtr->addOp(
+    CREATE_COMMAND_ITEM("show", "Display the subtree rooted at " + marriageOpDescription, displaySubTree, false)
+  );
   return onePersonMenuPtr;
 }
 
@@ -534,20 +547,164 @@ void UIController::addChild() {
   }
 }
 void UIController::checkoutMother() {
-  std::cout << "checkoutMother: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto motherPtr = trees[selectedTreeIndex]->GetMother();
+    if (motherPtr) {
+      std::cout << "Mother: [" << motherPtr->Id() << "] " << motherPtr->Name() << std::endl;
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::RESULT_NOT_FOUND;
+  }
+  if (FamilyTree::Error::RESULT_NOT_FOUND == error) {
+    std::cout << "Mother not found due to being the root (ancestor)." << std::endl;
+  } else if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << "Mother not found due to have no blood relation with the family tree." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Mother Error" << std::endl;
+  }
 }
 void UIController::checkoutFather() {
-  std::cout << "checkoutFather: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto fatherPtr = trees[selectedTreeIndex]->GetFather();
+    if (fatherPtr) {
+      std::cout << "Father: [" << fatherPtr->Id() << "] " << fatherPtr->Name() << std::endl;
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::RESULT_NOT_FOUND;
+  }
+  if (FamilyTree::Error::RESULT_NOT_FOUND == error) {
+    std::cout << "Father not found due to being the root (ancestor)." << std::endl;
+  } else if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << "Father not found due to lack of blood relation with the family tree." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Father Error" << std::endl;
+  }
 }
 void UIController::checkoutCouple() {
-  std::cout << "checkoutCouple: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto counterpartPtr = trees[selectedTreeIndex]->GetCouple();
+    if (counterpartPtr) {
+      std::cout << (personIsMale(counterpartPtr) ? "Husband" : "Wife")
+                << ": [" + counterpartPtr->Id() + "] "
+                << counterpartPtr->Name()
+                << std::endl;
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::INVALID_TYPE;
+  }
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << selectedPersonPtr->Name() << " is not a parent." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Couple Error" << std::endl;
+  }
 }
 void UIController::checkoutSilbings() {
-  std::cout << "checkoutSilbings: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto siblingsPtr = trees[selectedTreeIndex]->GetSiblings();
+    if (siblingsPtr) {
+      if (siblingsPtr->empty()) {
+        std::cout << selectedPersonPtr->Name() << " is the only child." << std::endl;
+      } else {
+        std::cout << "Siblings:" << std::endl;
+        for (auto &one : *siblingsPtr) {
+          std::cout << "[" << one->Id() << "] " << one->Name() << std::endl;
+        }
+      }
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::RESULT_NOT_FOUND;
+  }
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << "Siblings not found due to lack of blood relation with the family tree." << std::endl;
+  } else if (FamilyTree::Error::RESULT_NOT_FOUND == error) {
+    std::cout << "Siblings not found due to being the root (ancestor)." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Siblings Error" << std::endl;
+  }
 }
 void UIController::checkoutChildren() {
-  std::cout << "checkoutChildren: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto childrenPtr = trees[selectedTreeIndex]->GetChildren();
+    if (childrenPtr) {
+      if (childrenPtr->empty()) {
+        std::cout << selectedPersonPtr->Name() << " has no children for the moment." << std::endl;
+      } else {
+        std::cout << (childrenPtr->size() == 1 ? "The only child:" : "Children:") << std::endl;
+        for (auto &one : *childrenPtr) {
+          std::cout << "[" << one->Id() << "] " << one->Name() << std::endl;
+        }
+      }
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::INVALID_TYPE;
+  }
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << selectedPersonPtr->Name() << " is not a parent." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Siblings Error" << std::endl;
+  }
 }
 void UIController::checkoutExWives() {
-  std::cout << "checkoutExWives: hai mei zuo ne" << std::endl;
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  auto error = trees[selectedTreeIndex]->GetError();
+  try {
+    auto exwivesPtr = trees[selectedTreeIndex]->GetExWives();
+    if (exwivesPtr) {
+      if (exwivesPtr->empty()) {
+        std::cout << selectedPersonPtr->Name() << " is a good man." << std::endl;
+      } else {
+        std::cout << "Ex:" << std::endl;
+        for (auto &one : *exwivesPtr) {
+          std::cout << "[" << one->Id() << "] " << one->Name() << std::endl;
+        }
+      }
+      return;
+    }
+    error = trees[selectedTreeIndex]->GetError();
+  } catch (...) {
+    error = FamilyTree::Error::INVALID_TYPE;
+  }
+  if (FamilyTree::Error::INVALID_TYPE == error) {
+    std::cout << selectedPersonPtr->Name() << " is not a male." << std::endl;
+  } else {
+    std::cerr << "Unexpected Checkout Siblings Error" << std::endl;
+  }
+}
+
+void UIController::displaySubTree() {
+  auto selectedPersonPtr = trees[selectedTreeIndex]->SelectPerson();
+  printPersonTree(selectedPersonPtr);
+}
+
+void gracefullyExit(int sig) {
+  Terminal::getInstancePtr()->reset();
+  std::cout << std::endl;
+  switch (sig) {
+    case SIGSEGV:
+      std::cout << "[error] Something seems to have gone wrong. Check out the log for more information" << std::endl;
+      exit(0);
+      break;
+    default:
+      break;
+  }
 }
