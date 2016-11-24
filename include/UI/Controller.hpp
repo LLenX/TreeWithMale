@@ -6,6 +6,7 @@
 #include "./UI/UI.hpp"
 #include "./UI/MenuItem.hpp"
 #include "./FamilyTree.hpp"
+#include "./person/Person.hpp"
 
 class UIController {
  public:
@@ -19,21 +20,31 @@ class UIController {
   std::size_t selectedTreeIndex = 0;
   std::size_t treesNum = 0;
   bool started = false;
+  std::size_t selectedPersonIndex = 0;
 
   /* controllers */
   void init();
   void showCurMenu();
+  void expandMenu(std::shared_ptr<Menu> menuPtr);
   void back();
   void quit();
-  std::shared_ptr<Menu> createMenuPtr(const std::string &description);
+  std::shared_ptr<Menu> createMenuPtr(const std::string &description, bool needsBack = true);
 
-  std::size_t selectTreeIndex();
   void createNewTree();
+  std::size_t selectTreeIndex();
   void selectTree();
   void displayTreesInfo();
 
   std::shared_ptr<Menu> getOneTreeMenuPtr(const std::string &description);
+  std::size_t selectPersonIndex();
+  void selectPerson();
+  void displayTree();
   void deleteTree();
+
+  std::shared_ptr<Menu> getOnePersonMenuPtr(const std::string &description);
+  void personDie();
+  void addWife();
+  void addChild();
 
 };
 
