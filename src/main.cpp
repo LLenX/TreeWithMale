@@ -1,5 +1,5 @@
 #include <iostream>
-
-int main(int argc, char** argv) {
-    std::cout << "hello family\n";
+#include "./UI/Controller.hpp"
+int main(/*int argc, char** argv*/) {
+  UIController::getInstancePtr()->start();
 }
