@@ -41,6 +41,19 @@ if (CMAKE_BUILD_TYPE MATCHES DEBUG)
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin
             COMMENT "running test for tree")
 
+    add_executable(PrintTree
+            ${PROJECT_SOURCE_DIR}/test/utility/PrintTreeTest.cpp
+            ${PERSON_SOURCE}
+            ${PROJECT_SOURCE_DIR}/src/utility/PrintTree.cpp)
+    set_target_properties(PrintTree PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin)
+    target_link_libraries(PrintTree)
+
+    add_custom_target(print_tree
+            COMMAND PrintTree
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test/bin
+            COMMENT "running test for tree")
+
 endif ()
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ SOURCE_FILES)
