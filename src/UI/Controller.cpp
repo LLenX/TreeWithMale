@@ -697,7 +697,9 @@ void UIController::displaySubTree() {
 }
 
 void gracefullyExit(int sig) {
+#ifdef WIN32
   Terminal::getInstancePtr()->reset();
+#endif
   std::cout << std::endl;
   switch (sig) {
     case SIGSEGV:

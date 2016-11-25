@@ -2,6 +2,7 @@
 #define TREEWITHMALE_UI_MENU_HPP_
 
 #include <map>
+#include <string>
 
 class MenuItem;
 
@@ -17,7 +18,7 @@ class Menu {
   std::shared_ptr<Menu> getSubMenuPtrOf(const std::string &op) const;
  private:
   std::map<std::string, std::shared_ptr<MenuItem>> items;
-  const std::string description = "Menu";
+  const std::string description;
   std::size_t maxOpWidth = 0;
 };
 
