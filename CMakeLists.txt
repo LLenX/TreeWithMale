@@ -59,5 +59,7 @@ endif ()
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/ SOURCE_FILES)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/UI UI_SOURCE)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/utility UTIL_SOURCE)
 
-add_executable(TreeWithMale ${PERSON_SOURCE} ${SOURCE_FILES} ${UI_SOURCE})
+
+add_executable(TreeWithMale ${PERSON_SOURCE} ${SOURCE_FILES} ${UI_SOURCE} ${UTIL_SOURCE})
